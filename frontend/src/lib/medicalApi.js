@@ -1,4 +1,6 @@
-const API_BASE = "http://100.26.176.5:5000/api/medical-history";
+import { API_CONFIG } from '../config/api.js';
+
+const API_BASE = API_CONFIG.MEDICAL_HISTORY;
 
 // ======================================================
 // GET: Full medical history for a patient

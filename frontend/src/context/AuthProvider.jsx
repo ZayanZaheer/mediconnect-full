@@ -1,8 +1,9 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import { loadAuth, saveAuth, clearAuth } from "../lib/auth";
+import { API_CONFIG } from '../config/api.js';
 
 const AuthCtx = createContext(null);
-const API_BASE = "http://100.26.176.5:5000/api"
+const API_BASE = API_CONFIG.BASE_URL;
 
 export function AuthProvider({ children }) {
   const [auth, setAuth] = useState(() => loadAuth());

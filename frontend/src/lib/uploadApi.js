@@ -1,4 +1,6 @@
-const API_BASE = "http://100.26.176.5:5000/api";
+import { API_CONFIG } from '../config/api.js';
+
+const API_BASE = API_CONFIG.BASE_URL;
 
 /**
  * Upload profile photo

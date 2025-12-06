@@ -12,8 +12,9 @@ import { useToast } from "../components/ToastProvider.jsx";
 import { Plus, Search } from "lucide-react";
 import { inputWithIcon } from "../lib/ui.js";
 import { useAuth } from "../context/AuthProvider.jsx";
+import { API_CONFIG } from '../config/api.js';
 
-const API_BASE = "http://100.26.176.5:5000/api";
+const API_BASE = API_CONFIG.BASE_URL;
 
 export default function AdminUsers() {
   const { user } = useAuth();

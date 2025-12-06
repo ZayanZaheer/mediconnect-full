@@ -12,6 +12,9 @@ import { useClinicData } from "../context/ClinicDataProvider.jsx";
 import { formatPatientDate } from "../lib/date.js";
 import MemoModal, { memoStatusMeta } from "../components/MemoModal.jsx";
 import ReceiptModal from "../components/ReceiptModal.jsx";
+import { API_CONFIG } from '../config/api.js';
+
+const API_BASE = API_CONFIG.BASE_URL;
 
 function humanizeStatus(value) {
   if (!value) return "";
@@ -143,8 +146,6 @@ export default function ReceptionistDashboard() {
   }, [receipts]);
 
   async function handlePromoteWaitlist(waitlistId) {
-    const API_BASE = "http://100.26.176.5:5000/api";
-    
     try {
       const response = await fetch(`${API_BASE}/waitlist/${waitlistId}/promote`, {
         method: 'POST',
@@ -177,8 +178,6 @@ export default function ReceptionistDashboard() {
   }
 
   async function handleRemoveWaitlist(waitlistId) {
-    const API_BASE = "http://100.26.176.5:5000/api";
-    
     if (!confirm("Are you sure you want to remove this patient from the waitlist?")) {
       return;
     }

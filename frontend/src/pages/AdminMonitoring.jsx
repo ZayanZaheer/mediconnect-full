@@ -3,8 +3,9 @@ import AppShell from "../layout/AppShell.jsx";
 import Navbar from "../components/Navbar.jsx";
 import SidebarAdmin from "../layout/SidebarAdmin.jsx";
 import Button from "../components/Button.jsx";
+import { API_CONFIG } from '../config/api.js';
 
-const API_BASE = "http://100.26.176.5:5000/api";
+const API_BASE = API_CONFIG.BASE_URL;
 
 function Tile({ label, value, helper, status }) {
   const statusColors = {

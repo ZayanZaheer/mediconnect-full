@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAuth } from "./AuthProvider.jsx";
+import { API_CONFIG } from '../config/api.js';
 
-const API_BASE = "http://100.26.176.5:5000/api";
+const API_BASE = API_CONFIG.BASE_URL;
 
 const ClinicDataContext = createContext(null);
 

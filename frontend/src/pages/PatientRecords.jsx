@@ -12,8 +12,9 @@ import { formatPatientDate } from "../lib/date.js";
 import { inputBase } from "../lib/ui.js";
 import { useToast } from "../components/ToastProvider.jsx";
 import { uploadMedicalRecordFile } from "../lib/uploadApi.js";
+import { API_CONFIG } from '../config/api.js';
 
-const API_BASE = ("http://100.26.176.5:5000/api");
+const API_BASE = API_CONFIG.BASE_URL;
 
 export default function PatientRecords() {
   const pushToast = useToast();

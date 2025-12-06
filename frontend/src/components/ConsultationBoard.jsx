@@ -11,7 +11,9 @@ import { inputBase } from "../lib/ui.js";
 import { useClinicData } from "../context/ClinicDataProvider.jsx";
 import { useAuth } from "../context/AuthProvider.jsx";
 import { useToast } from "./ToastProvider.jsx";
-const API_BASE = "http://100.26.176.5:5000/api";
+import { API_CONFIG } from '../config/api.js';
+
+const API_BASE = API_CONFIG.BASE_URL;
 
 // --------------------------------
 // Constants
