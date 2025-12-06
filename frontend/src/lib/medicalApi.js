@@ -1,5 +1,5 @@
 const API_BASE =
-  (import.meta.env.VITE_API_URL || "http://localhost:5000") + "/api/medical-history";
+  ("/api") + "/api/medical-history";
 
 // ======================================================
 // GET: Full medical history for a patient

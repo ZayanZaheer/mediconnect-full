@@ -13,7 +13,7 @@ import { inputBase } from "../lib/ui.js";
 import { useToast } from "../components/ToastProvider.jsx";
 import { uploadMedicalRecordFile } from "../lib/uploadApi.js";
 
-const API_BASE = (import.meta.env.VITE_API_URL || "http://localhost:5000");
+const API_BASE = ("/api");
 
 export default function PatientRecords() {
   const pushToast = useToast();

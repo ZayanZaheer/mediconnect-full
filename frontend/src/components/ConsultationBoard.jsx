@@ -11,7 +11,7 @@ import { inputBase } from "../lib/ui.js";
 import { useClinicData } from "../context/ClinicDataProvider.jsx";
 import { useAuth } from "../context/AuthProvider.jsx";
 import { useToast } from "./ToastProvider.jsx";
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = "/api";
 
 // --------------------------------
 // Constants

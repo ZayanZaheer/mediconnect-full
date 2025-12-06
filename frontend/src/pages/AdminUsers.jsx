@@ -13,7 +13,7 @@ import { Plus, Search } from "lucide-react";
 import { inputWithIcon } from "../lib/ui.js";
 import { useAuth } from "../context/AuthProvider.jsx";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = "/api";
 
 export default function AdminUsers() {
   const { user } = useAuth();

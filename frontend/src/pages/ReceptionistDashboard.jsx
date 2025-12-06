@@ -143,7 +143,7 @@ export default function ReceptionistDashboard() {
   }, [receipts]);
 
   async function handlePromoteWaitlist(waitlistId) {
-    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    const API_BASE = "/api";
     
     try {
       const response = await fetch(`${API_BASE}/api/waitlist/${waitlistId}/promote`, {
@@ -177,7 +177,7 @@ export default function ReceptionistDashboard() {
   }
 
   async function handleRemoveWaitlist(waitlistId) {
-    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    const API_BASE = "/api";
     
     if (!confirm("Are you sure you want to remove this patient from the waitlist?")) {
       return;

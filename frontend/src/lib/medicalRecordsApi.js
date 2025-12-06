@@ -1,6 +1,6 @@
 // src/lib/medicalRecordsApi.js
 const API_BASE =
-  (import.meta.env.VITE_API_URL || "http://localhost:5000") + "/api/medicalrecords";
+  ("/api") + "/api/medicalrecords";
 
 // ======================================================
 // GET: Medical Records for a patient
