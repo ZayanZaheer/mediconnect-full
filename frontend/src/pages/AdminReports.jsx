@@ -8,7 +8,7 @@ import Select from "../components/Select.jsx";
 import FormField from "../components/FormField.jsx";
 import { Download, TrendingUp, Users, Calendar, DollarSign } from "lucide-react";
 
-const API_BASE = "http://localhost:5000/api/admin/reports";
+const API_BASE = "/api";
 
 function StatTile({ icon: Icon, label, value, change }) {
   return (
@@ -102,7 +102,7 @@ export default function AdminReports() {
         return alert("Start date must be before end date.");
       }
 
-      let url = `${API_BASE}/${reportType}`;
+      let url = `${API_BASE}/admin/reports/${reportType}`;
       const params = new URLSearchParams();
 
       if (range === "custom" && startDate && endDate) {
@@ -146,7 +146,7 @@ export default function AdminReports() {
         params.append("endDate", endDate);
       }
 
-      const response = await fetch(`${API_BASE}/export/${format}?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/admin/reports/export/${format}?${params.toString()}`);
       const blob = await response.blob();
 
       const url = window.URL.createObjectURL(blob);

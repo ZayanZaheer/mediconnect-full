@@ -106,7 +106,7 @@ export default function AdminUsers() {
 
     try {
       const response = await fetch(
-        `${API_BASE}/api/admin/users/${encodeURIComponent(email)}`,
+        `${API_BASE}/admin/users/${encodeURIComponent(email)}`,
         { method: "DELETE", headers: getHeaders() }
       );
 

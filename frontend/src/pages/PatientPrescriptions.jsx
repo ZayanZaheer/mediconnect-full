@@ -13,14 +13,14 @@ import { inputWithIcon } from "../lib/ui.js";
 import { fetchMedicalHistory } from "../lib/medicalApi.js";
 import { useAuth } from "../context/AuthProvider.jsx";
 
-// BACKEND base URL helper
-const backendUrl = "http://localhost:5000";
+// BACKEND base URL helper - use relative path for production compatibility
+const backendUrl = "";
 
 function fullUrl(path) {
   if (!path) return null;
   // already absolute URL?
   if (path.startsWith("http")) return path;
-  // convert "/uploads/prescriptions/17.pdf" → "http://localhost:5000/uploads/prescriptions/17.pdf"
+  // convert "/uploads/prescriptions/17.pdf" → "/uploads/prescriptions/17.pdf"
   return backendUrl + path;
 }
 

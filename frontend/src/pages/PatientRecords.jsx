@@ -48,7 +48,7 @@ export default function PatientRecords() {
       const email = JSON.parse(localStorage.getItem("auth"))?.user?.email;
 
       const res = await fetch(
-        `${API_BASE}/api/medicalrecords?patientEmail=${email}`
+        `${API_BASE}/medicalrecords?patientEmail=${email}`
       );
       const data = await res.json();
 

@@ -420,7 +420,7 @@ export default function AccountRegistrationForm({
           fd.append("file", form.avatar);
 
           const uploadRes = await fetch(
-            `${API_BASE}/api/upload/file?type=profile-photo`,
+            `${API_BASE}/upload/file?type=profile-photo`,
             {
               method: "POST",
               body: fd,
@@ -546,13 +546,13 @@ export default function AccountRegistrationForm({
       let endpoint = "";
 
       if (context === "public") {
-        endpoint = `${API_BASE}/api/auth/register`;
+        endpoint = `${API_BASE}/auth/register`;
       } 
       else if (context === "admin") {
-        endpoint = `${API_BASE}/api/admin/users`;
+        endpoint = `${API_BASE}/admin/users`;
       }
       else if (context === "receptionist") {
-        endpoint = `${API_BASE}/api/admin/users`;   // same endpoint as admin
+        endpoint = `${API_BASE}/admin/users`;   // same endpoint as admin
       }
 
 

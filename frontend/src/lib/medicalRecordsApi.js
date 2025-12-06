@@ -1,6 +1,5 @@
 // src/lib/medicalRecordsApi.js
-const API_BASE =
-  ("/api") + "/api/medicalrecords";
+const API_BASE = "/api/medicalrecords";
 
 // ======================================================
 // GET: Medical Records for a patient

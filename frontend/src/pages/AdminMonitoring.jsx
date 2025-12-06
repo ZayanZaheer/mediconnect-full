@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar.jsx";
 import SidebarAdmin from "../layout/SidebarAdmin.jsx";
 import Button from "../components/Button.jsx";
 
-const API_BASE = "http://localhost:5000/api/admin/monitoring";
+const API_BASE = "/api";
 
 function Tile({ label, value, helper, status }) {
   const statusColors = {
@@ -50,10 +50,10 @@ export default function AdminMonitoring() {
     setLoading(true);
     try {
       const [statusRes, latencyRes, errorsRes, storageRes] = await Promise.all([
-        fetch(`${API_BASE}/status`).then(r => r.json()),
-        fetch(`${API_BASE}/latency`).then(r => r.json()),
-        fetch(`${API_BASE}/errors`).then(r => r.json()),
-        fetch(`${API_BASE}/storage`).then(r => r.json())
+        fetch(`${API_BASE}/admin/monitoring/status`).then(r => r.json()),
+        fetch(`${API_BASE}/admin/monitoring/latency`).then(r => r.json()),
+        fetch(`${API_BASE}/admin/monitoring/errors`).then(r => r.json()),
+        fetch(`${API_BASE}/admin/monitoring/storage`).then(r => r.json())
       ]);
 
       setStatus(statusRes);

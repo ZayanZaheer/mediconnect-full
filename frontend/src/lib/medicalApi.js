@@ -1,5 +1,4 @@
-const API_BASE =
-  ("/api") + "/api/medical-history";
+const API_BASE = "/api/medical-history";
 
 // ======================================================
 // GET: Full medical history for a patient
