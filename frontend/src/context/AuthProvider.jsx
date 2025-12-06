@@ -2,7 +2,7 @@ import { createContext, useContext, useMemo, useState } from "react";
 import { loadAuth, saveAuth, clearAuth } from "../lib/auth";
 
 const AuthCtx = createContext(null);
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = "/api"
 
 export function AuthProvider({ children }) {
   const [auth, setAuth] = useState(() => loadAuth());
