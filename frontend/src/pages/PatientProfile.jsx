@@ -70,7 +70,7 @@ export default function PatientProfile() {
       if (!email) return;
 
       try {
-        const data = await fetchPatientProfile(email);
+        const data = await fetchPatientProfile(email, user?.token);
         const normalized = buildPatientProfile(data, email);
         setProfile(normalized);
         setForm(normalized);
@@ -165,7 +165,7 @@ export default function PatientProfile() {
     };
 
     try {
-      const updated = await updatePatientProfile(email, payload);
+      const updated = await updatePatientProfile(email, payload, user?.token);
       setProfile(buildPatientProfile(updated, email));
       setDirty(false);
 
@@ -175,9 +175,10 @@ export default function PatientProfile() {
       });
     // eslint-disable-next-line no-unused-vars
     } catch (err) {
+      console.error('Failed to update patient profile:', err);
       pushToast({
         tone: "error",
-        message: "Failed to update profile.",
+        message: err.message || "Failed to update profile.",
       });
     } finally {
       setSaving(false);

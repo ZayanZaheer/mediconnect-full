@@ -65,7 +65,7 @@ export default function ReceptionistProfile() {
       if (!email) return;
 
       try {
-        const data = await fetchReceptionistProfile(email);
+        const data = await fetchReceptionistProfile(email, user?.token);
         setProfile(data);
         setForm(data);
       } finally {
@@ -130,7 +130,7 @@ export default function ReceptionistProfile() {
     };
 
     try {
-      const updated = await updateReceptionistProfile(email, payload);
+      const updated = await updateReceptionistProfile(email, payload, user?.token);
       setProfile(updated);
       setForm(updated);
       setDirty(false);
@@ -141,6 +141,7 @@ export default function ReceptionistProfile() {
       });
 
     } catch (err) {
+      console.error('Failed to update receptionist profile:', err);
       pushToast({
         tone: "error",
         message: err.message || "Failed to update profile."

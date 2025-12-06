@@ -61,7 +61,7 @@ export default function AdminProfile() {
       if (!email) return;
 
       try {
-        const data = await fetchAdminProfile(email);
+        const data = await fetchAdminProfile(email, user?.token);
         const normalized = buildAdminProfile(data, email);
 
         setProfile(normalized);
@@ -126,7 +126,7 @@ export default function AdminProfile() {
     };
 
     try {
-      const updated = await updateAdminProfile(email, payload);
+      const updated = await updateAdminProfile(email, payload, user?.token);
       const normalized = buildAdminProfile(updated, email);
 
       setProfile(normalized);
@@ -138,6 +138,7 @@ export default function AdminProfile() {
         message: "Successfully updated profile!",
       });
     } catch (err) {
+      console.error('Failed to update admin profile:', err);
       pushToast({
         tone: "error",
         message: err.message || "Failed to update profile.",
