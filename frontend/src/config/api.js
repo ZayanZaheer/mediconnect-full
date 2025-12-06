@@ -17,6 +17,23 @@ export const API_CONFIG = {
 };
 
 /**
+ * Default headers for API requests
+ * Includes ngrok-skip-browser-warning to bypass ngrok's browser warning page
+ */
+export const getDefaultHeaders = (token = null) => {
+  const headers = {
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true"
+  };
+  
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  
+  return headers;
+};
+
+/**
  * Helper function to construct full API URLs
  * @param {string} path - The API endpoint path
  * @returns {string} Full API URL

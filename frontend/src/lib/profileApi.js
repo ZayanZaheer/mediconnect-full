@@ -4,7 +4,10 @@ const API_BASE = API_CONFIG.BASE_URL;
 
 // ------------ PATIENT (User table only) ----------------
 export async function fetchPatientProfile(email, token) {
-  const headers = { "Content-Type": "application/json" };
+  const headers = { 
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true"
+  };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const res = await fetch(`${API_BASE}/profile?email=${email}`, { headers });
@@ -35,7 +38,10 @@ export async function fetchPatientProfile(email, token) {
 }
 
 export async function updatePatientProfile(email, data, token) {
-  const headers = { "Content-Type": "application/json" };
+  const headers = { 
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true"
+  };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const res = await fetch(`${API_BASE}/profile?email=${email}`, {
@@ -71,7 +77,10 @@ export async function updatePatientProfile(email, data, token) {
 
 // ------------ DOCTOR ----------------------------------
 export async function fetchDoctorProfile(email, token) {
-  const headers = { "Content-Type": "application/json" };
+  const headers = { 
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true"
+  };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const res = await fetch(`${API_BASE}/doctors/${email}/profile`, { headers });
@@ -102,7 +111,10 @@ export async function fetchDoctorProfile(email, token) {
 }
 
 export async function updateDoctorProfile(email, data, token) {
-  const headers = { "Content-Type": "application/json" };
+  const headers = { 
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true"
+  };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const res = await fetch(`${API_BASE}/doctors/${email}/profile`, {
@@ -138,7 +150,10 @@ export async function updateDoctorProfile(email, data, token) {
 
 // ------------ RECEPTIONIST -----------------------------
 export async function fetchReceptionistProfile(email, token) {
-  const headers = { "Content-Type": "application/json" };
+  const headers = { 
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true"
+  };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const res = await fetch(`${API_BASE}/receptionists/${email}/profile`, { headers });
@@ -169,7 +184,10 @@ export async function fetchReceptionistProfile(email, token) {
 }
 
 export async function updateReceptionistProfile(email, data, token) {
-  const headers = { "Content-Type": "application/json" };
+  const headers = { 
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true"
+  };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const res = await fetch(`${API_BASE}/receptionists/${email}/profile`, {
@@ -205,7 +223,10 @@ export async function updateReceptionistProfile(email, data, token) {
 
 // ------------ ADMIN ------------------------------------
 export async function fetchAdminProfile(email, token) {
-  const headers = { "Content-Type": "application/json" };
+  const headers = { 
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true"
+  };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const res = await fetch(`${API_BASE}/admins/${email}/profile`, { headers });
@@ -236,7 +257,10 @@ export async function fetchAdminProfile(email, token) {
 }
 
 export async function updateAdminProfile(email, data, token) {
-  const headers = { "Content-Type": "application/json" };
+  const headers = { 
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true"
+  };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const res = await fetch(`${API_BASE}/admins/${email}/profile`, {
