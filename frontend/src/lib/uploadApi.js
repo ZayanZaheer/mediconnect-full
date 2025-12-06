@@ -11,6 +11,9 @@ export async function uploadProfilePhoto(file) {
 
   const res = await fetch(`${API_BASE}/upload/file?type=profile-photo`, {
     method: "POST",
+    headers: {
+      "ngrok-skip-browser-warning": "true"
+    },
     body: formData,
   });
 
@@ -32,6 +35,9 @@ export async function uploadMedicalRecordFile(file, patientEmail) {
 
   const res = await fetch(`${API_BASE}/upload/file?type=medical-record`, {
     method: "POST",
+    headers: {
+      "ngrok-skip-browser-warning": "true"
+    },
     body: formData,
   });
 

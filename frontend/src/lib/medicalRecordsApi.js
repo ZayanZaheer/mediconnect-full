@@ -9,20 +9,36 @@ const API_BASE = API_CONFIG.MEDICAL_RECORDS;
 export async function fetchMedicalRecords(patientEmail) {
   const q = patientEmail ? `?patientEmail=${encodeURIComponent(patientEmail)}` : "";
 
-  const res = await fetch(`${API_BASE}${q}`);
-
-  let data;
-  try {
-    data = await res.json();
-  } catch {
-    data = null;
-  }
+  const res = await fetch(`${API_BASE}${q}`, {
+    headers: {
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true"
+    }
+  });
 
   if (!res.ok) {
-    throw new Error(data?.message || "Failed to load medical records");
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `Failed to load medical records (${res.status})`;
+    
+    if (contentType?.includes('application/json')) {
+      const errorData = await res.json().catch(() => ({}));
+      errorMessage = errorData.message || errorMessage;
+    } else {
+      const text = await res.text();
+      console.error('Non-JSON response:', text.substring(0, 200));
+    }
+    
+    throw new Error(errorMessage);
   }
 
-  return data;
+  const contentType = res.headers.get('content-type');
+  if (!contentType?.includes('application/json')) {
+    const text = await res.text();
+    console.error('Expected JSON but got:', text.substring(0, 200));
+    throw new Error('Server returned non-JSON response');
+  }
+
+  return await res.json();
 }
 
 // ======================================================
@@ -32,22 +48,36 @@ export async function fetchMedicalRecords(patientEmail) {
 export async function createMedicalRecord(recordData) {
   const res = await fetch(API_BASE, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true"
+    },
     body: JSON.stringify(recordData),
   });
 
-  let data;
-  try {
-    data = await res.json();
-  } catch {
-    data = null;
-  }
-
   if (!res.ok) {
-    throw new Error(data?.message || "Failed to create medical record");
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `Failed to create medical record (${res.status})`;
+    
+    if (contentType?.includes('application/json')) {
+      const errorData = await res.json().catch(() => ({}));
+      errorMessage = errorData.message || errorMessage;
+    } else {
+      const text = await res.text();
+      console.error('Non-JSON response:', text.substring(0, 200));
+    }
+    
+    throw new Error(errorMessage);
   }
 
-  return data;
+  const contentType = res.headers.get('content-type');
+  if (!contentType?.includes('application/json')) {
+    const text = await res.text();
+    console.error('Expected JSON but got:', text.substring(0, 200));
+    throw new Error('Server returned non-JSON response');
+  }
+
+  return await res.json();
 }
 
 // ======================================================
@@ -56,16 +86,25 @@ export async function createMedicalRecord(recordData) {
 export async function deleteMedicalRecord(id) {
   const res = await fetch(`${API_BASE}/${encodeURIComponent(id)}`, {
     method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true"
+    }
   });
 
   if (!res.ok && res.status !== 204) {
-    let data;
-    try {
-      data = await res.json();
-      throw new Error(data?.message || "Failed to delete record");
-    } catch {
-      throw new Error("Failed to delete record");
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `Failed to delete record (${res.status})`;
+    
+    if (contentType?.includes('application/json')) {
+      const errorData = await res.json().catch(() => ({}));
+      errorMessage = errorData.message || errorMessage;
+    } else {
+      const text = await res.text();
+      console.error('Non-JSON response:', text.substring(0, 200));
     }
+    
+    throw new Error(errorMessage);
   }
 
   return true;
