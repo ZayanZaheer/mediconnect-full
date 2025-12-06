@@ -95,7 +95,7 @@ export default function PatientRecords() {
         recordDate: meta.date
       };
 
-      const res = await fetch(`${API_BASE}/api/medicalrecords`, {
+      const res = await fetch(`${API_BASE}/medicalrecords`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -124,7 +124,7 @@ export default function PatientRecords() {
   // ================================
   async function deleteRecord(id) {
     try {
-      const res = await fetch(`${API_BASE}/api/medicalrecords/${id}`, {
+      const res = await fetch(`${API_BASE}/medicalrecords/${id}`, {
         method: "DELETE"
       });
 

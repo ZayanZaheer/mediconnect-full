@@ -62,7 +62,7 @@ export default function AdminUsers() {
       try {
         setLoading(true);
 
-        const response = await fetch(`${API_BASE}/api/admin/users`, {
+        const response = await fetch(`${API_BASE}/admin/users`, {
           headers: getHeaders(),
         });
 

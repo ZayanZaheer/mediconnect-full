@@ -1,7 +1,7 @@
 const API_BASE = "/api";
 
 export async function updateAvatar(email, avatarUrl, token) {
-  const res = await fetch(`${API_BASE}/api/users/${email}/avatar`, {
+  const res = await fetch(`${API_BASE}/users/${email}/avatar`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

@@ -174,7 +174,7 @@ export default function DoctorAvailability() {
 
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE}/api/doctors/${doctorId}`, {
+        const response = await fetch(`${API_BASE}/doctors/${doctorId}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${user?.token || ""}`,
@@ -266,7 +266,7 @@ export default function DoctorAvailability() {
     setSaving(true);
     try {
       // ⚠️ CRITICAL: Backend UpdateAvailabilityDto expects `Availability` as a JSON STRING
-      const response = await fetch(`${API_BASE}/api/doctors/${doctorId}/availability`, {
+      const response = await fetch(`${API_BASE}/doctors/${doctorId}/availability`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

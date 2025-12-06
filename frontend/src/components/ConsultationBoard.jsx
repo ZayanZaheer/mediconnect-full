@@ -192,7 +192,7 @@ export default function ConsultationBoard({ doctorId, className = "" }) {
     }
 
     try {
-      const response = await fetch(`${API_BASE}/api/doctorsessions/${doctorId}/reset`, {
+      const response = await fetch(`${API_BASE}/doctorsessions/${doctorId}/reset`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

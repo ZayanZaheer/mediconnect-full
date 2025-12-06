@@ -7,7 +7,7 @@ export async function uploadProfilePhoto(file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(`${API_BASE}/api/upload/file?type=profile-photo`, {
+  const res = await fetch(`${API_BASE}/upload/file?type=profile-photo`, {
     method: "POST",
     body: formData,
   });
@@ -28,7 +28,7 @@ export async function uploadMedicalRecordFile(file, patientEmail) {
   formData.append("type", "medical-record");
   formData.append("patientEmail", patientEmail);
 
-  const res = await fetch(`${API_BASE}/api/upload/file?type=medical-record`, {
+  const res = await fetch(`${API_BASE}/upload/file?type=medical-record`, {
     method: "POST",
     body: formData,
   });

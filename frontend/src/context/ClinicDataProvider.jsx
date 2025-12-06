@@ -36,10 +36,10 @@ export function ClinicDataProvider({ children }) {
       const headers = getHeaders();
 
       // Default: fetch ALL appointments (safe for Patient, Receptionist, Admin)
-      let appointmentUrl = `${API_BASE}/api/appointments`;
+      let appointmentUrl = `${API_BASE}/appointments`;
 
       if (user.role === "Doctor") {
-        const doctorsResponse = await fetch(`${API_BASE}/api/doctors`, { headers });
+        const doctorsResponse = await fetch(`${API_BASE}/doctors`, { headers });
         const allDoctors = await doctorsResponse.json();
 
         const myDoctorRecord = allDoctors.find(
@@ -53,19 +53,19 @@ export function ClinicDataProvider({ children }) {
         const realDoctorId = myDoctorRecord?.id || user.doctorId || user.id;
 
         if (realDoctorId) {
-          appointmentUrl = `${API_BASE}/api/appointments/doctor/${realDoctorId}`;
+          appointmentUrl = `${API_BASE}/appointments/doctor/${realDoctorId}`;
         }
       }
 
       // Now fetch everything
       const [docs, apts, memos, sessions, recs, notifs, waits] = await Promise.all([
-        fetch(`${API_BASE}/api/doctors`, { headers }).then((r) => r.json()).catch(() => []),
+        fetch(`${API_BASE}/doctors`, { headers }).then((r) => r.json()).catch(() => []),
         fetch(appointmentUrl, { headers }).then((r) => r.json()).catch(() => []),
-        fetch(`${API_BASE}/api/consultationmemos`, { headers }).then((r) => r.json()).catch(() => []),
-        fetch(`${API_BASE}/api/doctorsessions`, { headers }).then((r) => r.json()).catch(() => []),
-        fetch(`${API_BASE}/api/receipts`, { headers }).then((r) => r.json()).catch(() => []),
-        fetch(`${API_BASE}/api/notifications`, { headers }).then((r) => r.json()).catch(() => []),
-        fetch(`${API_BASE}/api/waitlist`, { headers }).then((r) => r.json()).catch(() => []),
+        fetch(`${API_BASE}/consultationmemos`, { headers }).then((r) => r.json()).catch(() => []),
+        fetch(`${API_BASE}/doctorsessions`, { headers }).then((r) => r.json()).catch(() => []),
+        fetch(`${API_BASE}/receipts`, { headers }).then((r) => r.json()).catch(() => []),
+        fetch(`${API_BASE}/notifications`, { headers }).then((r) => r.json()).catch(() => []),
+        fetch(`${API_BASE}/waitlist`, { headers }).then((r) => r.json()).catch(() => []),
       ]);
 
       setDoctors(docs || []);
@@ -94,7 +94,7 @@ export function ClinicDataProvider({ children }) {
       try {
         // Check slot availability first
         const slotsResponse = await fetch(
-          `${API_BASE}/api/Appointments/slots?doctorId=${dto.doctorId}&date=${dto.date}`,
+          `${API_BASE}/Appointments/slots?doctorId=${dto.doctorId}&date=${dto.date}`,
           { headers: getHeaders() }
         );
         const slotsData = await slotsResponse.json();
@@ -114,7 +114,7 @@ export function ClinicDataProvider({ children }) {
             appointmentType: dto.type,
           };
 
-          const waitlistResponse = await fetch(`${API_BASE}/api/Waitlist`, {
+          const waitlistResponse = await fetch(`${API_BASE}/Waitlist`, {
             method: "POST",
             headers: getHeaders(),
             body: JSON.stringify(waitlistPayload),
@@ -144,7 +144,7 @@ export function ClinicDataProvider({ children }) {
           insurance: dto.insurance,
         };
 
-        const response = await fetch(`${API_BASE}/api/Appointments`, {
+        const response = await fetch(`${API_BASE}/Appointments`, {
           method: "POST",
           headers: getHeaders(),
           body: JSON.stringify(appointmentPayload),
@@ -159,7 +159,7 @@ export function ClinicDataProvider({ children }) {
 
         // If autoPay is true, immediately mark as paid
         if (dto.autoPay) {
-          await fetch(`${API_BASE}/api/Appointments/${newAppointment.id}/mark-paid`, {
+          await fetch(`${API_BASE}/Appointments/${newAppointment.id}/mark-paid`, {
             method: "POST",
             headers: getHeaders(),
             body: JSON.stringify({
@@ -183,7 +183,7 @@ export function ClinicDataProvider({ children }) {
   const updateAppointment = useCallback(
     async (id, updates) => {
       try {
-        const response = await fetch(`${API_BASE}/api/Appointments/${id}`, {
+        const response = await fetch(`${API_BASE}/Appointments/${id}`, {
           method: "PUT",
           headers: getHeaders(),
           body: JSON.stringify(updates),
@@ -207,7 +207,7 @@ export function ClinicDataProvider({ children }) {
   const cancelAppointment = useCallback(
     async (id, { message, doctorId, patientEmail } = {}) => {
       try {
-        const response = await fetch(`${API_BASE}/api/Appointments/${id}`, {
+        const response = await fetch(`${API_BASE}/Appointments/${id}`, {
           method: "DELETE",
           headers: getHeaders(),
         });
@@ -218,7 +218,7 @@ export function ClinicDataProvider({ children }) {
 
         // Create notification if message provided
         if (message) {
-          await fetch(`${API_BASE}/api/Notifications`, {
+          await fetch(`${API_BASE}/Notifications`, {
             method: "POST",
             headers: getHeaders(),
             body: JSON.stringify({
@@ -245,7 +245,7 @@ export function ClinicDataProvider({ children }) {
   const markAppointmentPaid = useCallback(
     async (id, { recordedBy, amount }) => {
       try {
-        const response = await fetch(`${API_BASE}/api/Appointments/${id}/mark-paid`, {
+        const response = await fetch(`${API_BASE}/Appointments/${id}/mark-paid`, {
           method: "POST",
           headers: getHeaders(),
           body: JSON.stringify({
@@ -272,7 +272,7 @@ export function ClinicDataProvider({ children }) {
   const markAppointmentNoShow = useCallback(
     async (id) => {
       try {
-        const response = await fetch(`${API_BASE}/api/Appointments/${id}/no-show`, {
+        const response = await fetch(`${API_BASE}/Appointments/${id}/no-show`, {
           method: "POST",
           headers: getHeaders(),
         });
@@ -293,7 +293,7 @@ export function ClinicDataProvider({ children }) {
   const rescheduleAppointment = useCallback(
     async (id, { newDate, newTime }) => {
       try {
-        const response = await fetch(`${API_BASE}/api/Appointments/${id}/reschedule`, {
+        const response = await fetch(`${API_BASE}/Appointments/${id}/reschedule`, {
           method: "POST",
           headers: getHeaders(),
           body: JSON.stringify({
@@ -319,7 +319,7 @@ export function ClinicDataProvider({ children }) {
   const checkInAppointment = useCallback(
     async (id) => {
       try {
-        const response = await fetch(`${API_BASE}/api/Appointments/${id}/check-in`, {
+        const response = await fetch(`${API_BASE}/Appointments/${id}/check-in`, {
           method: "POST",
           headers: getHeaders(),
         });
@@ -342,7 +342,7 @@ export function ClinicDataProvider({ children }) {
   const startNextConsultation = useCallback(
     async (doctorId) => {
       try {
-        await fetch(`${API_BASE}/api/doctorsessions/${doctorId}/start-next`, {
+        await fetch(`${API_BASE}/doctorsessions/${doctorId}/start-next`, {
           method: "POST",
           headers: getHeaders(),
         });
@@ -360,7 +360,7 @@ export function ClinicDataProvider({ children }) {
   const completeConsultation = useCallback(
     async (doctorId) => {
       try {
-        await fetch(`${API_BASE}/api/doctorsessions/${doctorId}/complete`, {
+        await fetch(`${API_BASE}/doctorsessions/${doctorId}/complete`, {
           method: "POST",
           headers: getHeaders(),
         });
@@ -378,7 +378,7 @@ export function ClinicDataProvider({ children }) {
   const setDoctorBreak = useCallback(
     async (doctorId) => {
       try {
-        await fetch(`${API_BASE}/api/doctorsessions/${doctorId}/break`, {
+        await fetch(`${API_BASE}/doctorsessions/${doctorId}/break`, {
           method: "POST",
           headers: getHeaders(),
         });
@@ -396,7 +396,7 @@ export function ClinicDataProvider({ children }) {
   const resumeDoctor = useCallback(
     async (doctorId) => {
       try {
-        await fetch(`${API_BASE}/api/doctorsessions/${doctorId}/resume`, {
+        await fetch(`${API_BASE}/doctorsessions/${doctorId}/resume`, {
           method: "POST",
           headers: getHeaders(),
         });
@@ -414,7 +414,7 @@ export function ClinicDataProvider({ children }) {
   const declareEmergency = useCallback(
     async (doctorId, { note, rescheduleTo }) => {
       try {
-        await fetch(`${API_BASE}/api/doctorsessions/${doctorId}/emergency`, {
+        await fetch(`${API_BASE}/doctorsessions/${doctorId}/emergency`, {
           method: "POST",
           headers: getHeaders(),
           body: JSON.stringify({ note, rescheduleTo }),
@@ -436,7 +436,7 @@ export function ClinicDataProvider({ children }) {
         const memo = consultationMemos.find((m) => m.id === memoId);
         if (!memo) return;
 
-        await fetch(`${API_BASE}/api/notifications`, {
+        await fetch(`${API_BASE}/notifications`, {
           method: "POST",
           headers: getHeaders(),
           body: JSON.stringify({
@@ -461,7 +461,7 @@ export function ClinicDataProvider({ children }) {
   const updateMemo = useCallback(
     async (id, updates) => {
       try {
-        await fetch(`${API_BASE}/api/consultationmemos/${id}/status`, {
+        await fetch(`${API_BASE}/consultationmemos/${id}/status`, {
           method: "PUT",
           headers: getHeaders(),
           body: JSON.stringify({
@@ -482,7 +482,7 @@ export function ClinicDataProvider({ children }) {
   const ensureDoctorSession = useCallback(
     async (doctorEmail) => {
       try {
-        await fetch(`${API_BASE}/api/doctorsessions/ensure/${doctorEmail}`, {
+        await fetch(`${API_BASE}/doctorsessions/ensure/${doctorEmail}`, {
           method: 'POST',
           headers: getHeaders(),
         });

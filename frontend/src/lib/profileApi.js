@@ -2,13 +2,13 @@ const API_BASE = "/api";
 
 // ------------ PATIENT (User table only) ----------------
 export async function fetchPatientProfile(email) {
-  const res = await fetch(`${API_BASE}/api/profile?email=${email}`);
+  const res = await fetch(`${API_BASE}/profile?email=${email}`);
   if (!res.ok) throw new Error("Failed to fetch patient profile");
   return await res.json();
 }
 
 export async function updatePatientProfile(email, data) {
-  const res = await fetch(`${API_BASE}/api/profile?email=${email}`, {
+  const res = await fetch(`${API_BASE}/profile?email=${email}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -19,13 +19,13 @@ export async function updatePatientProfile(email, data) {
 
 // ------------ DOCTOR ----------------------------------
 export async function fetchDoctorProfile(email) {
-  const res = await fetch(`${API_BASE}/api/doctors/${email}/profile`);
+  const res = await fetch(`${API_BASE}/doctors/${email}/profile`);
   if (!res.ok) throw new Error("Failed to fetch doctor profile");
   return await res.json();
 }
 
 export async function updateDoctorProfile(email, data) {
-  const res = await fetch(`${API_BASE}/api/doctors/${email}/profile`, {
+  const res = await fetch(`${API_BASE}/doctors/${email}/profile`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -36,13 +36,13 @@ export async function updateDoctorProfile(email, data) {
 
 // ------------ RECEPTIONIST -----------------------------
 export async function fetchReceptionistProfile(email) {
-  const res = await fetch(`${API_BASE}/api/receptionists/${email}/profile`);
+  const res = await fetch(`${API_BASE}/receptionists/${email}/profile`);
   if (!res.ok) throw new Error("Failed to fetch receptionist profile");
   return await res.json();
 }
 
 export async function updateReceptionistProfile(email, data) {
-  const res = await fetch(`${API_BASE}/api/receptionists/${email}/profile`, {
+  const res = await fetch(`${API_BASE}/receptionists/${email}/profile`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -53,13 +53,13 @@ export async function updateReceptionistProfile(email, data) {
 
 // ------------ ADMIN ------------------------------------
 export async function fetchAdminProfile(email) {
-  const res = await fetch(`${API_BASE}/api/admins/${email}/profile`);
+  const res = await fetch(`${API_BASE}/admins/${email}/profile`);
   if (!res.ok) throw new Error("Failed to fetch admin profile");
   return await res.json();
 }
 
 export async function updateAdminProfile(email, data) {
-  const res = await fetch(`${API_BASE}/api/admins/${email}/profile`, {
+  const res = await fetch(`${API_BASE}/admins/${email}/profile`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

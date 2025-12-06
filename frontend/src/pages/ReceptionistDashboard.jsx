@@ -146,7 +146,7 @@ export default function ReceptionistDashboard() {
     const API_BASE = "/api";
     
     try {
-      const response = await fetch(`${API_BASE}/api/waitlist/${waitlistId}/promote`, {
+      const response = await fetch(`${API_BASE}/waitlist/${waitlistId}/promote`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ export default function ReceptionistDashboard() {
     }
     
     try {
-      const response = await fetch(`${API_BASE}/api/waitlist/${waitlistId}`, {
+      const response = await fetch(`${API_BASE}/waitlist/${waitlistId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
