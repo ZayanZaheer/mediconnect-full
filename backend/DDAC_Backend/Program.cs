@@ -45,13 +45,17 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://localhost:5174"
-            )
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://0.0.0.0:5000",
+    "http://100.26.176.5:5000",
+    "https://mediconnect-full.vercel.app"
+)
+.AllowAnyMethod()
+.AllowAnyHeader()
+.AllowCredentials();
+
     });
 });
 
@@ -77,19 +81,20 @@ builder.Services.AddSwaggerGen(options =>
     });
 
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+{
     {
+        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
         {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            Reference = new Microsoft.OpenApi.Models.OpenApiReference
             {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                Id = "Bearer"
+            }
+        },
+        new string[] {}
+    }
+});
+
 });
 
 
@@ -101,8 +106,9 @@ builder.Services.AddLogging(logging =>
     logging.AddDebug();
 });
 
+builder.WebHost.UseUrls("http://0.0.0.0:5000");
 var app = builder.Build();
-
+app.UseCors("AllowFrontend");
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
@@ -133,8 +139,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
-
-app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 
