@@ -74,6 +74,12 @@ export default function PatientProfile() {
         const normalized = buildPatientProfile(data, email);
         setProfile(normalized);
         setForm(normalized);
+      } catch (err) {
+        console.error('Failed to load patient profile:', err);
+        pushToast({
+          tone: "error",
+          message: err.message || "Failed to load profile data."
+        });
       } finally {
         setLoading(false);
       }

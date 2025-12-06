@@ -68,6 +68,12 @@ export default function ReceptionistProfile() {
         const data = await fetchReceptionistProfile(email, user?.token);
         setProfile(data);
         setForm(data);
+      } catch (err) {
+        console.error('Failed to load receptionist profile:', err);
+        pushToast({
+          tone: "error",
+          message: err.message || "Failed to load profile data."
+        });
       } finally {
         setLoading(false);
       }

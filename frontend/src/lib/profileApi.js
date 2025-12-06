@@ -8,7 +8,22 @@ export async function fetchPatientProfile(email, token) {
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const res = await fetch(`${API_BASE}/profile?email=${email}`, { headers });
-  if (!res.ok) throw new Error("Failed to fetch patient profile");
+  
+  if (!res.ok) {
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `Failed to fetch patient profile (${res.status})`;
+    
+    if (contentType?.includes('application/json')) {
+      const errorData = await res.json().catch(() => ({}));
+      errorMessage = errorData.message || errorMessage;
+    } else {
+      const text = await res.text();
+      console.error('Non-JSON response:', text.substring(0, 200));
+    }
+    
+    throw new Error(errorMessage);
+  }
+  
   return await res.json();
 }
 
@@ -21,7 +36,22 @@ export async function updatePatientProfile(email, data, token) {
     headers,
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to update patient profile");
+  
+  if (!res.ok) {
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `Failed to update patient profile (${res.status})`;
+    
+    if (contentType?.includes('application/json')) {
+      const errorData = await res.json().catch(() => ({}));
+      errorMessage = errorData.message || errorMessage;
+    } else {
+      const text = await res.text();
+      console.error('Non-JSON response:', text.substring(0, 200));
+    }
+    
+    throw new Error(errorMessage);
+  }
+  
   return await res.json();
 }
 
@@ -31,7 +61,22 @@ export async function fetchDoctorProfile(email, token) {
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const res = await fetch(`${API_BASE}/doctors/${email}/profile`, { headers });
-  if (!res.ok) throw new Error("Failed to fetch doctor profile");
+  
+  if (!res.ok) {
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `Failed to fetch doctor profile (${res.status})`;
+    
+    if (contentType?.includes('application/json')) {
+      const errorData = await res.json().catch(() => ({}));
+      errorMessage = errorData.message || errorMessage;
+    } else {
+      const text = await res.text();
+      console.error('Non-JSON response:', text.substring(0, 200));
+    }
+    
+    throw new Error(errorMessage);
+  }
+  
   return await res.json();
 }
 
@@ -44,7 +89,22 @@ export async function updateDoctorProfile(email, data, token) {
     headers,
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to update doctor profile");
+  
+  if (!res.ok) {
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `Failed to update doctor profile (${res.status})`;
+    
+    if (contentType?.includes('application/json')) {
+      const errorData = await res.json().catch(() => ({}));
+      errorMessage = errorData.message || errorMessage;
+    } else {
+      const text = await res.text();
+      console.error('Non-JSON response:', text.substring(0, 200));
+    }
+    
+    throw new Error(errorMessage);
+  }
+  
   return await res.json();
 }
 
@@ -54,7 +114,22 @@ export async function fetchReceptionistProfile(email, token) {
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const res = await fetch(`${API_BASE}/receptionists/${email}/profile`, { headers });
-  if (!res.ok) throw new Error("Failed to fetch receptionist profile");
+  
+  if (!res.ok) {
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `Failed to fetch receptionist profile (${res.status})`;
+    
+    if (contentType?.includes('application/json')) {
+      const errorData = await res.json().catch(() => ({}));
+      errorMessage = errorData.message || errorMessage;
+    } else {
+      const text = await res.text();
+      console.error('Non-JSON response:', text.substring(0, 200));
+    }
+    
+    throw new Error(errorMessage);
+  }
+  
   return await res.json();
 }
 
@@ -67,7 +142,22 @@ export async function updateReceptionistProfile(email, data, token) {
     headers,
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to update receptionist profile");
+  
+  if (!res.ok) {
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `Failed to update receptionist profile (${res.status})`;
+    
+    if (contentType?.includes('application/json')) {
+      const errorData = await res.json().catch(() => ({}));
+      errorMessage = errorData.message || errorMessage;
+    } else {
+      const text = await res.text();
+      console.error('Non-JSON response:', text.substring(0, 200));
+    }
+    
+    throw new Error(errorMessage);
+  }
+  
   return await res.json();
 }
 
@@ -77,7 +167,22 @@ export async function fetchAdminProfile(email, token) {
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const res = await fetch(`${API_BASE}/admins/${email}/profile`, { headers });
-  if (!res.ok) throw new Error("Failed to fetch admin profile");
+  
+  if (!res.ok) {
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `Failed to fetch admin profile (${res.status})`;
+    
+    if (contentType?.includes('application/json')) {
+      const errorData = await res.json().catch(() => ({}));
+      errorMessage = errorData.message || errorMessage;
+    } else {
+      const text = await res.text();
+      console.error('Non-JSON response:', text.substring(0, 200));
+    }
+    
+    throw new Error(errorMessage);
+  }
+  
   return await res.json();
 }
 
@@ -100,7 +205,21 @@ export async function updateAdminProfile(email, data, token) {
     }),
   });
 
-  if (!res.ok) throw new Error("Failed to update admin profile");
+  if (!res.ok) {
+    const contentType = res.headers.get('content-type');
+    let errorMessage = `Failed to update admin profile (${res.status})`;
+    
+    if (contentType?.includes('application/json')) {
+      const errorData = await res.json().catch(() => ({}));
+      errorMessage = errorData.message || errorMessage;
+    } else {
+      const text = await res.text();
+      console.error('Non-JSON response:', text.substring(0, 200));
+    }
+    
+    throw new Error(errorMessage);
+  }
+  
   return await res.json();
 }
 

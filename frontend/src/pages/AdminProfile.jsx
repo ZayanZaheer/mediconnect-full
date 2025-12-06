@@ -66,6 +66,12 @@ export default function AdminProfile() {
 
         setProfile(normalized);
         setForm(normalized);
+      } catch (err) {
+        console.error('Failed to load admin profile:', err);
+        pushToast({
+          tone: "error",
+          message: err.message || "Failed to load profile data."
+        });
       } finally {
         setLoading(false);
       }

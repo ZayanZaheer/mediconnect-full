@@ -61,6 +61,12 @@ export default function DoctorProfile() {
         const data = await fetchDoctorProfile(email, user?.token);
         setProfile(data);
         setForm(data);
+      } catch (err) {
+        console.error('Failed to load doctor profile:', err);
+        pushToast({
+          tone: "error",
+          message: err.message || "Failed to load profile data."
+        });
       } finally {
         setLoading(false);
       }
