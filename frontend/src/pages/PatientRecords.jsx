@@ -12,6 +12,7 @@ import { formatPatientDate } from "../lib/date.js";
 import { inputBase } from "../lib/ui.js";
 import { useToast } from "../components/ToastProvider.jsx";
 import { uploadMedicalRecordFile } from "../lib/uploadApi.js";
+import { fetchMedicalRecords, createMedicalRecord, deleteMedicalRecord } from "../lib/medicalRecordsApi.js";
 import { API_CONFIG } from '../config/api.js';
 
 const API_BASE = API_CONFIG.BASE_URL;
@@ -45,17 +46,17 @@ export default function PatientRecords() {
   // ================================
   const loadRecords = useCallback(async () => {
     setLoading(true);
+    console.log('🔄 Starting to load medical records...');
     try {
       const email = JSON.parse(localStorage.getItem("auth"))?.user?.email;
+      console.log('📧 User email:', email);
 
-      const res = await fetch(
-        `${API_BASE}/medicalrecords?patientEmail=${email}`
-      );
-      const data = await res.json();
+      const data = await fetchMedicalRecords(email);
+      console.log('✅ Records loaded successfully:', data);
 
       setRecords(data);
-    // eslint-disable-next-line no-unused-vars
     } catch (err) {
+      console.error('❌ Failed to load records:', err);
       pushToast({ tone: "error", message: "Failed to load records" });
     } finally {
       setLoading(false);
@@ -65,7 +66,7 @@ export default function PatientRecords() {
 
   useEffect(() => {
     loadRecords();
-  }, [pushToast]);
+  }, [loadRecords]);
 
   // ================================
   // Upload file + create record
@@ -96,15 +97,7 @@ export default function PatientRecords() {
         recordDate: meta.date
       };
 
-      const res = await fetch(`${API_BASE}/medicalrecords`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data?.message || "Upload failed");
+      await createMedicalRecord(payload);
 
       pushToast({ tone: "success", message: "Record uploaded successfully." });
 
@@ -125,15 +118,12 @@ export default function PatientRecords() {
   // ================================
   async function deleteRecord(id) {
     try {
-      const res = await fetch(`${API_BASE}/medicalrecords/${id}`, {
-        method: "DELETE"
-      });
-
-      if (!res.ok) throw new Error("Delete failed");
+      await deleteMedicalRecord(id);
 
       pushToast({ tone: "success", message: "Record deleted." });
       loadRecords();
-    } catch {
+    } catch (err) {
+      console.error('❌ Failed to delete record:', err);
       pushToast({ tone: "error", message: "Failed to delete record." });
     }
   }
