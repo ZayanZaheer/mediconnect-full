@@ -24,6 +24,13 @@ export async function fetchPatientProfile(email, token) {
     throw new Error(errorMessage);
   }
   
+  const contentType = res.headers.get('content-type');
+  if (!contentType?.includes('application/json')) {
+    const text = await res.text();
+    console.error('Expected JSON but got:', text.substring(0, 200));
+    throw new Error('Server returned non-JSON response');
+  }
+  
   return await res.json();
 }
 
@@ -52,6 +59,13 @@ export async function updatePatientProfile(email, data, token) {
     throw new Error(errorMessage);
   }
   
+  const contentType = res.headers.get('content-type');
+  if (!contentType?.includes('application/json')) {
+    const text = await res.text();
+    console.error('Expected JSON but got:', text.substring(0, 200));
+    throw new Error('Server returned non-JSON response');
+  }
+  
   return await res.json();
 }
 
@@ -75,6 +89,13 @@ export async function fetchDoctorProfile(email, token) {
     }
     
     throw new Error(errorMessage);
+  }
+  
+  const contentType = res.headers.get('content-type');
+  if (!contentType?.includes('application/json')) {
+    const text = await res.text();
+    console.error('Expected JSON but got:', text.substring(0, 200));
+    throw new Error('Server returned non-JSON response');
   }
   
   return await res.json();
@@ -105,6 +126,13 @@ export async function updateDoctorProfile(email, data, token) {
     throw new Error(errorMessage);
   }
   
+  const contentType = res.headers.get('content-type');
+  if (!contentType?.includes('application/json')) {
+    const text = await res.text();
+    console.error('Expected JSON but got:', text.substring(0, 200));
+    throw new Error('Server returned non-JSON response');
+  }
+  
   return await res.json();
 }
 
@@ -128,6 +156,13 @@ export async function fetchReceptionistProfile(email, token) {
     }
     
     throw new Error(errorMessage);
+  }
+  
+  const contentType = res.headers.get('content-type');
+  if (!contentType?.includes('application/json')) {
+    const text = await res.text();
+    console.error('Expected JSON but got:', text.substring(0, 200));
+    throw new Error('Server returned non-JSON response');
   }
   
   return await res.json();
@@ -158,6 +193,13 @@ export async function updateReceptionistProfile(email, data, token) {
     throw new Error(errorMessage);
   }
   
+  const contentType = res.headers.get('content-type');
+  if (!contentType?.includes('application/json')) {
+    const text = await res.text();
+    console.error('Expected JSON but got:', text.substring(0, 200));
+    throw new Error('Server returned non-JSON response');
+  }
+  
   return await res.json();
 }
 
@@ -181,6 +223,13 @@ export async function fetchAdminProfile(email, token) {
     }
     
     throw new Error(errorMessage);
+  }
+  
+  const contentType = res.headers.get('content-type');
+  if (!contentType?.includes('application/json')) {
+    const text = await res.text();
+    console.error('Expected JSON but got:', text.substring(0, 200));
+    throw new Error('Server returned non-JSON response');
   }
   
   return await res.json();
@@ -218,6 +267,13 @@ export async function updateAdminProfile(email, data, token) {
     }
     
     throw new Error(errorMessage);
+  }
+  
+  const contentType = res.headers.get('content-type');
+  if (!contentType?.includes('application/json')) {
+    const text = await res.text();
+    console.error('Expected JSON but got:', text.substring(0, 200));
+    throw new Error('Server returned non-JSON response');
   }
   
   return await res.json();
