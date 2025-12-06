@@ -8,12 +8,27 @@ const API_BASE = API_CONFIG.MEDICAL_RECORDS;
 // ======================================================
 export async function fetchMedicalRecords(patientEmail) {
   const q = patientEmail ? `?patientEmail=${encodeURIComponent(patientEmail)}` : "";
+  const url = `${API_BASE}${q}`;
+  
+  console.log('🔍 Fetching medical records:', {
+    url,
+    patientEmail,
+    API_BASE
+  });
 
-  const res = await fetch(`${API_BASE}${q}`, {
+  const res = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
       "ngrok-skip-browser-warning": "true"
     }
+  });
+
+  console.log('📡 Response received:', {
+    status: res.status,
+    statusText: res.statusText,
+    ok: res.ok,
+    contentType: res.headers.get('content-type'),
+    url: res.url
   });
 
   if (!res.ok) {
@@ -22,10 +37,11 @@ export async function fetchMedicalRecords(patientEmail) {
     
     if (contentType?.includes('application/json')) {
       const errorData = await res.json().catch(() => ({}));
+      console.error('❌ Error response data:', errorData);
       errorMessage = errorData.message || errorMessage;
     } else {
       const text = await res.text();
-      console.error('Non-JSON response:', text.substring(0, 200));
+      console.error('❌ Non-JSON error response:', text.substring(0, 500));
     }
     
     throw new Error(errorMessage);
@@ -34,11 +50,18 @@ export async function fetchMedicalRecords(patientEmail) {
   const contentType = res.headers.get('content-type');
   if (!contentType?.includes('application/json')) {
     const text = await res.text();
-    console.error('Expected JSON but got:', text.substring(0, 200));
+    console.error('❌ Expected JSON but got:', text.substring(0, 500));
     throw new Error('Server returned non-JSON response');
   }
 
-  return await res.json();
+  const data = await res.json();
+  console.log('✅ Successfully fetched records:', {
+    recordCount: Array.isArray(data) ? data.length : 'N/A',
+    dataType: typeof data,
+    isArray: Array.isArray(data)
+  });
+
+  return data;
 }
 
 // ======================================================
