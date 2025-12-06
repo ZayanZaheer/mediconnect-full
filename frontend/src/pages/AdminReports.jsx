@@ -8,7 +8,7 @@ import Select from "../components/Select.jsx";
 import FormField from "../components/FormField.jsx";
 import { Download, TrendingUp, Users, Calendar, DollarSign } from "lucide-react";
 
-const API_BASE = "/api";
+const API_BASE = "http://100.26.176.5:5000/api";
 
 function StatTile({ icon: Icon, label, value, change }) {
   return (

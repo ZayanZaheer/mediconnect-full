@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar.jsx";
 import SidebarAdmin from "../layout/SidebarAdmin.jsx";
 import Button from "../components/Button.jsx";
 
-const API_BASE = "/api";
+const API_BASE = "http://100.26.176.5:5000/api";
 
 function Tile({ label, value, helper, status }) {
   const statusColors = {

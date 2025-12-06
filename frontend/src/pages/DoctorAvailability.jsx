@@ -10,7 +10,7 @@ import { useToast } from "../components/ToastProvider.jsx";
 import { useAuth } from "../context/AuthProvider.jsx";
 import { useClinicData } from "../context/ClinicDataProvider.jsx";
 
-const API_BASE = "/api";
+const API_BASE = "http://100.26.176.5:5000/api";
 
 const dayLabels = {
   mon: "Monday",

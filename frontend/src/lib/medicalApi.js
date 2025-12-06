@@ -1,4 +1,4 @@
-const API_BASE = "/api/medical-history";
+const API_BASE = "http://100.26.176.5:5000/api/medical-history";
 
 // ======================================================
 // GET: Full medical history for a patient

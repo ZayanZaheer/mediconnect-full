@@ -15,7 +15,7 @@ import {
   RECEPTION_SHIFT_OPTIONS,
 } from "../lib/options.js";
 import { composePhoneSelectClasses } from "../lib/ui.js";
-const API_BASE = "/api";
+const API_BASE = "http://100.26.176.5:5000/api";
 
 const genderOptions = [
   { value: "Male", label: "Male" },

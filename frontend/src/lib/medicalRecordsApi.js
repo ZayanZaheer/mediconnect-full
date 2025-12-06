@@ -1,5 +1,5 @@
 // src/lib/medicalRecordsApi.js
-const API_BASE = "/api/medicalrecords";
+const API_BASE = "http://100.26.176.5:5000/api/medicalrecords";
 
 // ======================================================
 // GET: Medical Records for a patient

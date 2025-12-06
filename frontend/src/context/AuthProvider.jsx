@@ -2,7 +2,7 @@ import { createContext, useContext, useMemo, useState } from "react";
 import { loadAuth, saveAuth, clearAuth } from "../lib/auth";
 
 const AuthCtx = createContext(null);
-const API_BASE = "/api"
+const API_BASE = "http://100.26.176.5:5000/api"
 
 export function AuthProvider({ children }) {
   const [auth, setAuth] = useState(() => loadAuth());

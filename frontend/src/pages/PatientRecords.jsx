@@ -13,7 +13,7 @@ import { inputBase } from "../lib/ui.js";
 import { useToast } from "../components/ToastProvider.jsx";
 import { uploadMedicalRecordFile } from "../lib/uploadApi.js";
 
-const API_BASE = ("/api");
+const API_BASE = ("http://100.26.176.5:5000/api");
 
 export default function PatientRecords() {
   const pushToast = useToast();
