@@ -249,23 +249,15 @@ export default function DatePicker({
   }
 
   function goToPreviousMonth() {
-    setViewMonth((prev) => {
-      if (prev === 0) {
-        setViewYear((year) => year - 1);
-        return 11;
-      }
-      return prev - 1;
-    });
+    const next = new Date(viewYear, viewMonth - 1, 1);
+    setViewYear(next.getFullYear());
+    setViewMonth(next.getMonth());
   }
 
   function goToNextMonth() {
-    setViewMonth((prev) => {
-      if (prev === 11) {
-        setViewYear((year) => year + 1);
-        return 0;
-      }
-      return prev + 1;
-    });
+    const next = new Date(viewYear, viewMonth + 1, 1);
+    setViewYear(next.getFullYear());
+    setViewMonth(next.getMonth());
   }
 
   const monthFormatter = useMemo(
@@ -333,7 +325,10 @@ export default function DatePicker({
             width: position.width,
           }}
         >
-          <div className="flex items-center justify-between gap-2 px-3 py-2">
+          <div
+            className="flex items-center justify-between gap-2 px-3 py-2"
+            onMouseDown={(e) => e.stopPropagation()} // keep picker open when interacting with selects/buttons
+          >
             <button
               type="button"
               onClick={goToPreviousMonth}

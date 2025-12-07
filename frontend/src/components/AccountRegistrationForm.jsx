@@ -15,6 +15,7 @@ import {
   RECEPTION_SHIFT_OPTIONS,
 } from "../lib/options.js";
 import { composePhoneSelectClasses } from "../lib/ui.js";
+import { normalizePhoneInput, validatePhoneDigits } from "../lib/phone.js";
 import { API_CONFIG } from '../config/api.js';
 
 const API_BASE = API_CONFIG.BASE_URL;
@@ -192,7 +193,6 @@ export default function AccountRegistrationForm({
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const nationalIdRegex = /^\d{6}-\d{2}-\d{4}$/; // e.g. 890123-45-6789
-  const phoneRegex = /^\+?[0-9\s-]{7,}$/;
 
   const labels = {
     firstName: "first name",
@@ -247,6 +247,16 @@ export default function AccountRegistrationForm({
         if (typeof raw === "object" && raw.value !== undefined) return raw.value;
         if (raw instanceof Date && !isNaN(raw)) return raw.toISOString();
         return raw;
+    };
+
+    // --- validatePhoneField() helper for country-specific validation ---
+    const validatePhoneField = (value, code, errorKey, label) => {
+      const { ok, limit } = validatePhoneDigits(value, code);
+      if (!ok) {
+        nextErrors[errorKey] = `${label} must be ${limit.min}–${limit.max} digits for the selected country.`;
+        return false;
+      }
+      return true;
     };
 
     // --- ensureField() ---
@@ -315,7 +325,7 @@ export default function AccountRegistrationForm({
         });
 
         ensureField("phoneCountryCode", { verb: "select" });
-        ensureField("phone", { pattern: phoneRegex, patternMessage: "Please enter a valid phone number." });
+        validatePhoneField(getValue("phone"), getValue("phoneCountryCode"), "phone", "Phone");
 
         ensureField("insurance", { verb: "select" });
 
@@ -329,10 +339,12 @@ export default function AccountRegistrationForm({
         ensureField("emergencyName");
         ensureField("emergencyRelationship", { verb: "select" });
         ensureField("emergencyCountryCode", { verb: "select" });
-        ensureField("emergencyPhone", {
-            pattern: phoneRegex,
-            patternMessage: "Please enter a valid emergency contact phone number.",
-        });
+        validatePhoneField(
+          getValue("emergencyPhone"),
+          getValue("emergencyCountryCode"),
+          "emergencyPhone",
+          "Emergency phone"
+        );
 
         if (context === "public" && !form.agree) {
             nextErrors.agree = "Please agree to the terms and privacy policy.";
@@ -350,10 +362,12 @@ export default function AccountRegistrationForm({
     // --- Receptionist-only fields ---
     if (role === "Receptionist") {
         ensureField("workPhoneCountryCode", { verb: "select" });
-        ensureField("workPhone", {
-            pattern: phoneRegex,
-            patternMessage: "Please enter a valid work phone number.",
-        });
+        validatePhoneField(
+          getValue("workPhone"),
+          getValue("workPhoneCountryCode"),
+          "workPhone",
+          "Work phone"
+        );
 
         ensureField("receptionStaffId");
         ensureField("receptionHireDate");
@@ -815,7 +829,11 @@ export default function AccountRegistrationForm({
                   <div>
                     <Select
                       value={form.phoneCountryCode}
-                      onChange={(value) => updateField("phoneCountryCode", value)}
+                      onChange={(value) => {
+                        updateField("phoneCountryCode", value);
+                        // re-normalize phone against new country max length
+                        updateField("phone", normalizePhoneInput(form.phone, value));
+                      }}
                       options={COUNTRY_CALLING_CODE_OPTIONS}
                       className={phoneSelectClasses}
                       maxVisible={6}
@@ -826,7 +844,9 @@ export default function AccountRegistrationForm({
                     <input
                       type="tel"
                       value={form.phone || ""}
-                      onChange={(event) => updateField("phone", event.target.value)}
+                      onChange={(event) =>
+                        updateField("phone", normalizePhoneInput(event.target.value, form.phoneCountryCode))
+                      }
                       placeholder="12-345 6789"
                       className={`mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm shadow-sm transition focus:ring-1 ${theme.field}`}
                     />
@@ -931,7 +951,10 @@ export default function AccountRegistrationForm({
                       <div>
                         <Select
                           value={form.workPhoneCountryCode}
-                          onChange={(value) => updateField("workPhoneCountryCode", value)}
+                          onChange={(value) => {
+                            updateField("workPhoneCountryCode", value);
+                            updateField("workPhone", normalizePhoneInput(form.workPhone, value));
+                          }}
                           options={COUNTRY_CALLING_CODE_OPTIONS}
                           className={phoneSelectClasses}
                           maxVisible={6}
@@ -942,7 +965,9 @@ export default function AccountRegistrationForm({
                         <input
                           type="tel"
                           value={form.workPhone || ""}
-                          onChange={(event) => updateField("workPhone", event.target.value)}
+                          onChange={(event) =>
+                            updateField("workPhone", normalizePhoneInput(event.target.value, form.workPhoneCountryCode))
+                          }
                           placeholder="12-345 6789"
                           className={`mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm shadow-sm transition focus:ring-1 ${theme.field}`}
                         />
@@ -1073,7 +1098,10 @@ export default function AccountRegistrationForm({
                   <div>
                     <Select
                       value={form.emergencyCountryCode}
-                      onChange={(value) => updateField("emergencyCountryCode", value)}
+                      onChange={(value) => {
+                        updateField("emergencyCountryCode", value);
+                        updateField("emergencyPhone", normalizePhoneInput(form.emergencyPhone, value));
+                      }}
                       options={COUNTRY_CALLING_CODE_OPTIONS}
                       
                         className={phoneSelectClasses}
@@ -1085,7 +1113,9 @@ export default function AccountRegistrationForm({
                     <input
                       type="tel"
                       value={form.emergencyPhone || ""}
-                      onChange={(event) => updateField("emergencyPhone", event.target.value)}
+                      onChange={(event) =>
+                        updateField("emergencyPhone", normalizePhoneInput(event.target.value, form.emergencyCountryCode))
+                      }
                         placeholder="e.g. 12-345 6789"
                         className={`mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm shadow-sm transition focus:ring-1 ${theme.field}`}
                       />
