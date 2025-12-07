@@ -43,7 +43,8 @@ export default function AdminUsers() {
 
   const getHeaders = () => ({
     "Content-Type": "application/json",
-    Authorization: `Bearer ${user?.token || ""}`,
+    "Authorization": `Bearer ${user?.token || ""}`,
+    "ngrok-skip-browser-warning": "true"
   });
 
   // --------------------- LOAD USERS ---------------------
