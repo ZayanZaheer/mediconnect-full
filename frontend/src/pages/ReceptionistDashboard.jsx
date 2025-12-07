@@ -151,6 +151,7 @@ export default function ReceptionistDashboard() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
         },
       });
 
@@ -187,6 +188,7 @@ export default function ReceptionistDashboard() {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
         },
       });
 

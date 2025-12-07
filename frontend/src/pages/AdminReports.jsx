@@ -116,7 +116,12 @@ export default function AdminReports() {
         params.append("endDate", endDate);
       }
 
-      const response = await fetch(`${url}?${params.toString()}`);
+      const response = await fetch(`${url}?${params.toString()}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true"
+        }
+      });
       const data = await response.json();
       setReportData(data);
     } catch (error) {
@@ -147,7 +152,11 @@ export default function AdminReports() {
         params.append("endDate", endDate);
       }
 
-      const response = await fetch(`${API_BASE}/admin/reports/export/${format}?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/admin/reports/export/${format}?${params.toString()}`, {
+        headers: {
+          "ngrok-skip-browser-warning": "true"
+        }
+      });
       const blob = await response.blob();
 
       const url = window.URL.createObjectURL(blob);

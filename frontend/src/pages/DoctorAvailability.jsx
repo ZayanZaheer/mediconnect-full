@@ -178,7 +178,8 @@ export default function DoctorAvailability() {
         const response = await fetch(`${API_BASE}/doctors/${doctorId}`, {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${user?.token || ""}`,
+            "Authorization": `Bearer ${user?.token || ""}`,
+            "ngrok-skip-browser-warning": "true"
           },
         });
 
@@ -271,7 +272,8 @@ export default function DoctorAvailability() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${user?.token || ""}`,
+          "Authorization": `Bearer ${user?.token || ""}`,
+          "ngrok-skip-browser-warning": "true"
         },
         body: JSON.stringify({
           availability: JSON.stringify(draft),  // ✅ Serialize to JSON string

@@ -10,7 +10,10 @@ export function ClinicDataProvider({ children }) {
   const { user } = useAuth();
 
   const getHeaders = useCallback(() => {
-    const headers = { "Content-Type": "application/json" };
+    const headers = {
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true"
+    };
     if (user?.token) {
       headers["Authorization"] = `Bearer ${user.token}`;
     }

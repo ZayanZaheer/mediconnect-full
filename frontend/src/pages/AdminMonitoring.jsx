@@ -50,11 +50,16 @@ export default function AdminMonitoring() {
   async function fetchMonitoringData() {
     setLoading(true);
     try {
+      const headers = {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true"
+      };
+
       const [statusRes, latencyRes, errorsRes, storageRes] = await Promise.all([
-        fetch(`${API_BASE}/admin/monitoring/status`).then(r => r.json()),
-        fetch(`${API_BASE}/admin/monitoring/latency`).then(r => r.json()),
-        fetch(`${API_BASE}/admin/monitoring/errors`).then(r => r.json()),
-        fetch(`${API_BASE}/admin/monitoring/storage`).then(r => r.json())
+        fetch(`${API_BASE}/admin/monitoring/status`, { headers }).then(r => r.json()),
+        fetch(`${API_BASE}/admin/monitoring/latency`, { headers }).then(r => r.json()),
+        fetch(`${API_BASE}/admin/monitoring/errors`, { headers }).then(r => r.json()),
+        fetch(`${API_BASE}/admin/monitoring/storage`, { headers }).then(r => r.json())
       ]);
 
       setStatus(statusRes);
