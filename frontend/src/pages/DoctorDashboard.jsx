@@ -131,7 +131,8 @@ export default function DoctorDashboard() {
           console.error("Failed to create doctor session:", err);
         });
     }
-  }, [user, doctors, sessions, ensureDoctorSession, refreshData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, doctors, sessions, ensureDoctorSession]);
 
   // Today's date in YYYY-MM-DD
   const todayIso = useMemo(() => {
