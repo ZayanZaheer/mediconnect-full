@@ -995,6 +995,39 @@ export default function AccountRegistrationForm({
                     />
                     {renderError("receptionHireDate")}
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">Shift</label>
+                    <Select
+                      value={form.receptionShift}
+                      onChange={(value) => updateField("receptionShift", value)}
+                      options={RECEPTION_SHIFT_OPTIONS}
+                      placeholder="Select shift"
+                      className="mt-1"
+                      maxVisible={6}
+                    />
+                    {renderError("receptionShift")}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">Desk / Counter location</label>
+                    <input
+                      value={form.receptionDesk}
+                      onChange={(event) => updateField("receptionDesk", event.target.value)}
+                      placeholder="e.g. Front desk A"
+                      className={`mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm shadow-sm transition focus:ring-1 ${theme.field}`}
+                    />
+                    {renderError("receptionDesk")}
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700">Notes</label>
+                    <textarea
+                      value={form.receptionNotes}
+                      onChange={(event) => updateField("receptionNotes", event.target.value)}
+                      placeholder="e.g. Handles patient registration and billing inquiries."
+                      className={`mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm shadow-sm transition focus:ring-1 ${theme.field}`}
+                      rows={3}
+                    />
+                    {renderError("receptionNotes")}
+                  </div>
                 </div>
               </section>
 
