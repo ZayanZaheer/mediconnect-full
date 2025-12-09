@@ -55,19 +55,45 @@ export default function AdminMonitoring() {
         "ngrok-skip-browser-warning": "true"
       };
 
+      console.log('🔍 Fetching monitoring data from:', {
+        status: `${API_BASE}/admin/monitoring/status`,
+        latency: `${API_BASE}/admin/monitoring/latency`,
+        errors: `${API_BASE}/admin/monitoring/errors`,
+        storage: `${API_BASE}/admin/monitoring/storage`
+      });
+
       const [statusRes, latencyRes, errorsRes, storageRes] = await Promise.all([
-        fetch(`${API_BASE}/admin/monitoring/status`, { headers }).then(r => r.json()),
-        fetch(`${API_BASE}/admin/monitoring/latency`, { headers }).then(r => r.json()),
-        fetch(`${API_BASE}/admin/monitoring/errors`, { headers }).then(r => r.json()),
-        fetch(`${API_BASE}/admin/monitoring/storage`, { headers }).then(r => r.json())
+        fetch(`${API_BASE}/admin/monitoring/status`, { headers }).then(async r => {
+          console.log('📊 Status response:', r.status, r.statusText);
+          if (!r.ok) {
+            const text = await r.text();
+            console.error('❌ Status endpoint error:', text);
+            throw new Error(`Status endpoint failed: ${r.status}`);
+          }
+          return r.json();
+        }),
+        fetch(`${API_BASE}/admin/monitoring/latency`, { headers }).then(async r => {
+          if (!r.ok) throw new Error(`Latency endpoint failed: ${r.status}`);
+          return r.json();
+        }),
+        fetch(`${API_BASE}/admin/monitoring/errors`, { headers }).then(async r => {
+          if (!r.ok) throw new Error(`Errors endpoint failed: ${r.status}`);
+          return r.json();
+        }),
+        fetch(`${API_BASE}/admin/monitoring/storage`, { headers }).then(async r => {
+          if (!r.ok) throw new Error(`Storage endpoint failed: ${r.status}`);
+          return r.json();
+        })
       ]);
+
+      console.log('✅ Monitoring data loaded:', { statusRes, latencyRes, errorsRes, storageRes });
 
       setStatus(statusRes);
       setLatency(latencyRes);
       setErrors(errorsRes);
       setStorage(storageRes);
     } catch (error) {
-      console.error("Error fetching monitoring data:", error);
+      console.error("❌ Error fetching monitoring data:", error);
     } finally {
       setLoading(false);
     }
