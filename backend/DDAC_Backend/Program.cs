@@ -54,6 +54,7 @@ builder.Services.AddCors(options =>
 )
 .AllowAnyMethod()
 .AllowAnyHeader()
+.WithExposedHeaders("ngrok-skip-browser-warning")
 .AllowCredentials();
 
     });

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import AppShell from "../layout/AppShell.jsx";
 import Navbar from "../components/Navbar.jsx";
 import SidebarDoctor from "../layout/SidebarDoctor.jsx";
@@ -75,6 +75,7 @@ export default function DoctorDashboard() {
   } = useClinicData();
 
   const [search, setSearch] = useState("");
+  const sessionCreationAttempted = useRef(false);
 
   // Safely find the current doctor's profile
   const doctorProfile = useMemo(() => {
@@ -120,15 +121,20 @@ export default function DoctorDashboard() {
 
     const hasSession = sessions?.some((s) => s.doctorId === currentDoctor.id);
 
-    if (!hasSession) {
+    // Only create session if we haven't already attempted it for this doctor
+    if (!hasSession && !sessionCreationAttempted.current) {
       console.log("Creating doctor session for:", currentDoctor.name || user.email);
+      sessionCreationAttempted.current = true; // Mark as attempted immediately
+      
       ensureDoctorSession(user.email)
         .then(() => {
-          console.log("Session created, refreshing data...");
+          console.log("Session created successfully");
           refreshData();
         })
         .catch((err) => {
           console.error("Failed to create doctor session:", err);
+          // Reset on error so user can retry
+          sessionCreationAttempted.current = false;
         });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
