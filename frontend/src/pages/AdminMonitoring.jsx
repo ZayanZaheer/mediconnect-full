@@ -7,6 +7,10 @@ import { API_CONFIG } from '../config/api.js';
 
 const API_BASE = API_CONFIG.BASE_URL;
 
+// Debug: Log the actual API base being used
+console.log('🔍 AdminMonitoring API_BASE:', API_BASE);
+console.log('🔍 API_CONFIG:', API_CONFIG);
+
 function Tile({ label, value, helper, status }) {
   const statusColors = {
     healthy: "bg-green-50 border-green-200",

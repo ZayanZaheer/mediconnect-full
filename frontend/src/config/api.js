@@ -3,9 +3,26 @@
  * 
  * Uses Vite environment variables (import.meta.env.VITE_API_URL)
  * Falls back to localhost for development if not set
+ * 
+ * IMPORTANT: On Vercel, set VITE_API_URL in Environment Variables!
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+// Debug logging in development
+if (import.meta.env.DEV) {
+  console.log('🔧 API Configuration:', {
+    VITE_API_URL: import.meta.env.VITE_API_URL,
+    API_BASE_URL,
+    mode: import.meta.env.MODE
+  });
+}
+
+// Production warning if API URL not set
+if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
+  console.warn('⚠️ WARNING: VITE_API_URL is not set! API calls will fail.');
+  console.warn('👉 Set VITE_API_URL in Vercel Environment Variables');
+}
 
 export const API_CONFIG = {
   // Standard API base for most endpoints
