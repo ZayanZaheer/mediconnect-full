@@ -155,7 +155,11 @@ export default function DoctorRecords() {
   // --------------------------------------------------
   useEffect(() => {
     async function load() {
-      if (!selectedPatient) return;
+      if (!selectedPatient) {
+        setLoading(false);
+        setHistory([]);
+        return;
+      }
       try {
         setLoading(true);
         const data = await fetchMedicalHistory(selectedPatient);
