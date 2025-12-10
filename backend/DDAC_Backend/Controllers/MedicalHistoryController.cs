@@ -138,7 +138,9 @@ namespace DDAC_Backend.Controllers
             entry.FileUrl = $"/uploads/prescriptions/{saved.Id}.pdf";
             await _context.SaveChangesAsync();
 
-            return Ok(entry);
+            // Return updated DTO instead of raw entity
+            saved.FileUrl = entry.FileUrl;
+            return Ok(saved);
         }
 
 

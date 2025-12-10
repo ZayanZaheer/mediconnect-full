@@ -6,7 +6,7 @@ import KPI from "../components/KPI.jsx";
 import Button from "../components/Button.jsx";
 import Pill from "../components/Pill.jsx";
 import { CalendarPlus, Upload, ChevronRight, FileText, History, Users, Loader2, AlertTriangle } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { formatPatientDate } from "../lib/date.js";
 import { getStatusTone } from "../lib/ui.js";
 import { useAuth } from "../context/AuthProvider.jsx";
@@ -14,16 +14,8 @@ import { useClinicData } from "../context/ClinicDataProvider.jsx";
 import MemoModal, { memoStatusMeta } from "../components/MemoModal.jsx";
 import ReceiptModal from "../components/ReceiptModal.jsx";
 import { useToast } from "../components/ToastProvider.jsx";
-
-const MOCK_RECORDS = [
-  { id: "rec-001", date: "2025-09-30", kind: "Blood Test", by: "Dr. Aziz" },
-  { id: "rec-002", date: "2025-09-10", kind: "X-Ray", by: "Dr. Noor" },
-];
-
-const MOCK_PRESCRIPTIONS = [
-  { id: "rx-001", date: "2025-09-30", name: "Amoxicillin 500mg", doctor: "Dr. Aziz" },
-  { id: "rx-002", date: "2025-08-12", name: "Vitamin D 1000IU", doctor: "Dr. Lim" },
-];
+import { fetchMedicalRecords } from "../lib/medicalRecordsApi.js";
+import { fetchMedicalHistory } from "../lib/medicalApi.js";
 
 function formatDeadline(value) {
   if (!value) return "—";
@@ -141,9 +133,37 @@ export default function PatientDashboard() {
 
   const activeReceipt = activeMemo ? receiptByAppointment.get(activeMemo.appointmentId) : null;
 
-  const records = MOCK_RECORDS;
-  const prescriptions = MOCK_PRESCRIPTIONS;
-  const loading = false;
+  const [records, setRecords] = useState([]);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      if (!userEmail) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const [recordsData, historyData] = await Promise.all([
+          fetchMedicalRecords(userEmail).catch(() => []),
+          fetchMedicalHistory(userEmail).catch(() => [])
+        ]);
+
+        setRecords(recordsData || []);
+        
+        const prescriptionData = (historyData || []).filter(item => item.type === "Prescription");
+        setPrescriptions(prescriptionData);
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, [userEmail]);
 
   return (
     <div className="min-h-screen bg-slate-50">

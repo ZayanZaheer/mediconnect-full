@@ -11,6 +11,7 @@ import { Eye, Upload, X } from "lucide-react";
 import { formatPatientDate } from "../lib/date.js";
 import { inputBase } from "../lib/ui.js";
 import { useToast } from "../components/ToastProvider.jsx";
+import { useAuth } from "../context/AuthProvider.jsx";
 import { uploadMedicalRecordFile } from "../lib/uploadApi.js";
 import { fetchMedicalRecords, createMedicalRecord, deleteMedicalRecord } from "../lib/medicalRecordsApi.js";
 import { API_CONFIG } from '../config/api.js';
@@ -19,6 +20,7 @@ const API_BASE = API_CONFIG.BASE_URL;
 
 export default function PatientRecords() {
   const pushToast = useToast();
+  const { user } = useAuth();
 
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,8 +50,13 @@ export default function PatientRecords() {
     setLoading(true);
     console.log('🔄 Starting to load medical records...');
     try {
-      const email = JSON.parse(localStorage.getItem("auth"))?.user?.email;
+      const email = user?.email;
       console.log('📧 User email:', email);
+
+      if (!email) {
+        console.warn('⚠️ No user email available');
+        return;
+      }
 
       const data = await fetchMedicalRecords(email);
       console.log('✅ Records loaded successfully:', data);
@@ -61,7 +68,7 @@ export default function PatientRecords() {
     } finally {
       setLoading(false);
     }
-  }, [pushToast]);
+  }, [pushToast, user]);
 
 
   useEffect(() => {
@@ -84,7 +91,12 @@ export default function PatientRecords() {
       const fileResult = await uploadMedicalRecordFile(file);
 
       // 2. Create DB record
-      const email = JSON.parse(localStorage.getItem("auth"))?.user?.email;
+      const email = user?.email;
+
+      if (!email) {
+        pushToast({ tone: "error", message: "User email not found" });
+        return;
+      }
 
       const payload = {
         patientEmail: email,

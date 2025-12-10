@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { Activity, FileBarChart2, LayoutDashboard, Users, UserCog, Stethoscope } from "lucide-react";
+import { Activity, FileBarChart2, LayoutDashboard, Users, UserCog } from "lucide-react";
 import { useAuth } from "../context/AuthProvider";
 
 const itemBase =
@@ -88,11 +88,6 @@ export default function SidebarAdmin() {
           to: "/admin/monitoring",
           icon: Activity,
           label: "Monitoring",
-        },
-        {
-          to: "/admin/consultations",
-          icon: Stethoscope,
-          label: "Consultation Details",
         },
       ],
     },

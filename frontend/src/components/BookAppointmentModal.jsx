@@ -68,6 +68,7 @@ export default function BookAppointmentModal({
     nationalId: "",
   });
   const [patientSearchQuery, setPatientSearchQuery] = useState("");
+  const [patientLookupResults, setPatientLookupResults] = useState([]);
 
   useEffect(() => {
     if (open) {
@@ -77,8 +78,24 @@ export default function BookAppointmentModal({
         nationalId: "",
       });
       setPatientSearchQuery("");
+      setPatientLookupResults([]);
     }
   }, [open, patientName, patientEmail]);
+
+  // Async search for patients
+  useEffect(() => {
+    if (!receptionistMode || !patientSearchQuery.trim()) {
+      setPatientLookupResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const results = await searchRegisteredUsers(patientSearchQuery);
+      setPatientLookupResults(results.slice(0, 6));
+    }, 300); // Debounce search
+
+    return () => clearTimeout(timer);
+  }, [patientSearchQuery, receptionistMode]);
 
   const doctorOptions = useMemo(() =>
     doctors
@@ -362,11 +379,6 @@ export default function BookAppointmentModal({
       pushToast({ tone: "error", message });
     }
   };
-
-  const patientLookupResults = useMemo(() => {
-    if (!receptionistMode || !patientSearchQuery.trim()) return [];
-    return searchRegisteredUsers(patientSearchQuery).slice(0, 6);
-  }, [patientSearchQuery, receptionistMode]);
 
   return (
     <ModalFrame open={open} onClose={onClose}>

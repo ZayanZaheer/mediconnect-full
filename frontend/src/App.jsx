@@ -37,7 +37,6 @@ import AdminReports from "./pages/AdminReports.jsx";
 import AdminMonitoring from "./pages/AdminMonitoring.jsx";
 import AdminProfile from "./pages/AdminProfile.jsx";
 import AdminUserCreate from "./pages/AdminUserCreate.jsx";
-import AdminConsultations from "./pages/AdminConsultations.jsx";
 
 export default function App() {
   return (
@@ -131,10 +130,6 @@ export default function App() {
       <Route
         path="/admin/monitoring"
         element={<RequireAuth roles={["Admin"]}><AdminMonitoring /></RequireAuth>}
-      />
-      <Route
-        path="/admin/consultations"
-        element={<RequireAuth roles={["Admin"]}><AdminConsultations /></RequireAuth>}
       />
       <Route
         path="/admin/profile"
