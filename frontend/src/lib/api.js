@@ -4,19 +4,27 @@ const API_BASE = API_CONFIG.BASE_URL;
 
 export const api = {
   // Auth
-  login: (credentials) => 
-    fetch(`${API_BASE}/auth/login`, {
+  login: (credentials) => {
+    // Use Lambda function if available, otherwise fallback to backend
+    const url = API_CONFIG.LAMBDA.LOGIN || `${API_BASE}/auth/login`;
+    
+    return fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials)
-    }).then(r => r.json()),
+    }).then(r => r.json());
+  },
   
-  register: (data) =>
-    fetch(`${API_BASE}/auth/register`, {
+  register: (data) => {
+    // Use Lambda function if available, otherwise fallback to backend
+    const url = API_CONFIG.LAMBDA.REGISTER || `${API_BASE}/auth/register`;
+    
+    return fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
-    }).then(r => r.json()),
+    }).then(r => r.json());
+  },
   
   // Appointments
   getAppointments: (params) => {

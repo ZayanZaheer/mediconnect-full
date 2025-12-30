@@ -8,12 +8,14 @@ namespace LoginUser;
 
 public class Function
 {
-    private readonly string _connectionString;
+    private string? _connectionString;
 
+    // IMPORTANT:
+    // Do NOT read environment variables in the constructor.
+    // Lambda may invoke this before env vars are available.
     public Function()
     {
-        _connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
-            ?? throw new Exception("DB_CONNECTION_STRING environment variable not set");
+        // Intentionally empty
     }
 
     public async Task<object> FunctionHandler(object input, ILambdaContext context)
@@ -21,12 +23,30 @@ public class Function
         try
         {
             context.Logger.LogInformation("LoginUser Lambda started");
-            context.Logger.LogInformation($"Input: {JsonSerializer.Serialize(input)}");
 
+            // ----------------------------------------------------
+            // SAFE environment variable retrieval (FIX)
+            // ----------------------------------------------------
+            if (string.IsNullOrEmpty(_connectionString))
+            {
+                _connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
+                if (string.IsNullOrEmpty(_connectionString))
+                {
+                    context.Logger.LogError("DB_CONNECTION_STRING environment variable not set");
+                    return CreateResponse(500, new
+                    {
+                        message = "Server configuration error"
+                    });
+                }
+            }
+
+            // ----------------------------------------------------
             // Parse input
+            // ----------------------------------------------------
             var json = JsonSerializer.Serialize(input);
             var doc = JsonDocument.Parse(json);
-            
+
             string bodyJson;
             if (doc.RootElement.TryGetProperty("body", out var bodyElement))
             {
@@ -37,34 +57,33 @@ public class Function
                 bodyJson = json;
             }
 
-            var body = JsonSerializer.Deserialize<LoginRequest>(bodyJson);
+            var body = JsonSerializer.Deserialize<LoginRequest>(
+                bodyJson,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
 
-            if (body == null || string.IsNullOrWhiteSpace(body.Email) || string.IsNullOrWhiteSpace(body.Password))
+            if (body == null ||
+                string.IsNullOrWhiteSpace(body.Email) ||
+                string.IsNullOrWhiteSpace(body.Password))
             {
-                return new
+                return CreateResponse(400, new
                 {
-                    statusCode = 400,
-                    headers = new Dictionary<string, string>
-                    {
-                        { "Content-Type", "application/json" },
-                        { "Access-Control-Allow-Origin", "*" },
-                        { "Access-Control-Allow-Headers", "Content-Type,Authorization" },
-                        { "Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS" }
-                    },
-                    body = JsonSerializer.Serialize(new { message = "Email and password are required" })
-                };
+                    message = "Email and password are required"
+                });
             }
 
             context.Logger.LogInformation($"Processing login for: {body.Email}");
 
-            // Query database
+            // ----------------------------------------------------
+            // Database query
+            // ----------------------------------------------------
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
             await using var cmd = new NpgsqlCommand(
-                @"SELECT ""Email"", ""FirstName"", ""LastName"", ""PasswordHash"", ""Role"" 
-                  FROM ""Users"" 
-                  WHERE ""Email"" = @email", 
+                @"SELECT ""Email"", ""FirstName"", ""LastName"", ""PasswordHash"", ""Role""
+                  FROM ""Users""
+                  WHERE ""Email"" = @email",
                 conn);
 
             cmd.Parameters.AddWithValue("email", body.Email.ToLower());
@@ -74,18 +93,7 @@ public class Function
             if (!await reader.ReadAsync())
             {
                 context.Logger.LogInformation($"❌ User not found: {body.Email}");
-                return new
-                {
-                    statusCode = 401,
-                    headers = new Dictionary<string, string>
-                    {
-                        { "Content-Type", "application/json" },
-                        { "Access-Control-Allow-Origin", "*" },
-                        { "Access-Control-Allow-Headers", "Content-Type,Authorization" },
-                        { "Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS" }
-                    },
-                    body = JsonSerializer.Serialize(new { message = "Invalid credentials" })
-                };
+                return CreateResponse(401, new { message = "Invalid credentials" });
             }
 
             var email = reader.GetString(0);
@@ -94,81 +102,73 @@ public class Function
             var passwordHash = reader.GetString(3);
             var role = reader.GetString(4);
 
+            // ----------------------------------------------------
             // Verify password
+            // ----------------------------------------------------
             if (!BCrypt.Net.BCrypt.Verify(body.Password, passwordHash))
             {
                 context.Logger.LogInformation($"❌ Invalid password for: {body.Email}");
-                return new
-                {
-                    statusCode = 401,
-                    headers = new Dictionary<string, string>
-                    {
-                        { "Content-Type", "application/json" },
-                        { "Access-Control-Allow-Origin", "*" },
-                        { "Access-Control-Allow-Headers", "Content-Type,Authorization" },
-                        { "Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS" }
-                    },
-                    body = JsonSerializer.Serialize(new { message = "Invalid credentials" })
-                };
+                return CreateResponse(401, new { message = "Invalid credentials" });
             }
 
             context.Logger.LogInformation($"✅ Login successful: {email} (Role: {role})");
 
-            // Generate token (simple dev token)
+            // ----------------------------------------------------
+            // Generate token (DEV placeholder)
+            // ----------------------------------------------------
             var token = $"dev-token-{Guid.NewGuid()}";
 
-            // Return response matching Task 1 format
-            return new
+            return CreateResponse(200, new
             {
-                statusCode = 200,
-                headers = new Dictionary<string, string>
+                token = token,
+                role = role,
+                user = new
                 {
-                    { "Content-Type", "application/json" },
-                    { "Access-Control-Allow-Origin", "*" },
-                    { "Access-Control-Allow-Headers", "Content-Type,Authorization" },
-                    { "Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS" }
-                },
-                body = JsonSerializer.Serialize(new
-                {
-                    token = token,
-                    role = role,
-                    user = new
-                    {
-                        id = (string?)null,
-                        specialty = (string?)null,
-                        name = $"{firstName} {lastName}".Trim(),
-                        email = email,
-                        firstName = firstName,
-                        lastName = lastName,
-                        role = role
-                    }
-                })
-            };
+                    id = (string?)null,
+                    specialty = (string?)null,
+                    name = $"{firstName} {lastName}".Trim(),
+                    email = email,
+                    firstName = firstName,
+                    lastName = lastName,
+                    role = role
+                }
+            });
         }
         catch (Exception ex)
         {
             context.Logger.LogError($"❌ Error: {ex.Message}");
-            context.Logger.LogError($"Stack trace: {ex.StackTrace}");
+            context.Logger.LogError(ex.StackTrace);
 
-            return new
+            return CreateResponse(500, new
             {
-                statusCode = 500,
-                headers = new Dictionary<string, string>
-                {
-                    { "Content-Type", "application/json" },
-                    { "Access-Control-Allow-Origin", "*" },
-                    { "Access-Control-Allow-Headers", "Content-Type,Authorization" },
-                    { "Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS" }
-                },
-                body = JsonSerializer.Serialize(new { message = ex.Message })
-            };
+                message = "Internal server error"
+            });
         }
+    }
+
+    // ----------------------------------------------------
+    // Shared API Gateway response helper
+    // ----------------------------------------------------
+    private object CreateResponse(int statusCode, object body)
+    {
+        return new
+        {
+            statusCode,
+            headers = new Dictionary<string, string>
+            {
+                { "Content-Type", "application/json" },
+                { "Access-Control-Allow-Origin", "*" },
+                { "Access-Control-Allow-Headers", "Content-Type,Authorization" },
+                { "Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS" }
+            },
+            body = JsonSerializer.Serialize(body)
+        };
     }
 
     public class LoginRequest
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-        public string? Role { get; set; }  // Optional: Frontend can send selected role
+        public string? Role { get; set; }
     }
 }

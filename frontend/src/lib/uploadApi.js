@@ -26,6 +26,9 @@ export async function uploadProfilePhoto(file) {
  * Upload medical record file
  */
 export async function uploadMedicalRecordFile(file, patientEmail) {
+  // Use Lambda function if available, otherwise fallback to backend
+  const url = API_CONFIG.LAMBDA.UPLOAD_MEDICAL_RECORD || `${API_BASE}/upload/file?type=medical-record`;
+  
   const formData = new FormData();
   formData.append("file", file);
 
@@ -33,7 +36,7 @@ export async function uploadMedicalRecordFile(file, patientEmail) {
   formData.append("type", "medical-record");
   formData.append("patientEmail", patientEmail);
 
-  const res = await fetch(`${API_BASE}/upload/file?type=medical-record`, {
+  const res = await fetch(url, {
     method: "POST",
     headers: {
       "ngrok-skip-browser-warning": "true"
