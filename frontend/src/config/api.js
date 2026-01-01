@@ -1,45 +1,72 @@
 /**
- * Centralized API Configuration for AWS Lambda via API Gateway
+ * Centralized API Configuration for Dual-Backend Architecture
  * 
- * IMPORTANT: Set VITE_API_URL to your AWS API Gateway base URL
- * Example: https://ayvlc6aa4c.execute-api.us-east-1.amazonaws.com/prod
+ * VITE_API_URL: Main ASP.NET Core backend (EC2/ngrok) - uses /api/* route prefixes
+ *   - All application endpoints (appointments, doctors, users, medical records, etc.)
+ *   - Example: https://backend.example.com/api/appointments
  * 
- * All endpoints are accessed directly without /api prefix
+ * VITE_LAMBDA_API_URL: AWS Lambda via API Gateway - direct endpoints (no /api prefix)
+ *   - Auth endpoints: /login, /register
+ *   - Upload endpoint: /upload-medical-record
+ *   - Example: https://xxx.execute-api.us-east-1.amazonaws.com/prod/login
  */
 
-// AWS API Gateway base URL (from environment variable or fallback)
-const API_BASE_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.DEV ? 'https://ayvlc6aa4c.execute-api.us-east-1.amazonaws.com/prod' : '');
+// Main backend URL (ASP.NET Core on EC2/Express)
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+// Lambda API Gateway URL (auth & upload only)
+const LAMBDA_API_BASE_URL = import.meta.env.VITE_LAMBDA_API_URL;
+
+// Runtime validation - throw errors if environment variables are not defined
+if (!API_BASE_URL) {
+  throw new Error(
+    '❌ VITE_API_URL is not defined! Add it to your .env.local file.\n' +
+    'Example: VITE_API_URL=https://your-backend.ngrok-free.dev'
+  );
+}
+
+if (!LAMBDA_API_BASE_URL) {
+  throw new Error(
+    '❌ VITE_LAMBDA_API_URL is not defined! Add it to your .env.local file.\n' +
+    'Example: VITE_LAMBDA_API_URL=https://xxx.execute-api.us-east-1.amazonaws.com/prod'
+  );
+}
 
 // Debug logging in development
 if (import.meta.env.DEV) {
-  console.log('🔧 API Configuration (AWS Lambda via API Gateway):', {
+  console.log('🔧 API Configuration (Dual-Backend Architecture):', {
     API_BASE_URL,
+    LAMBDA_API_BASE_URL,
     mode: import.meta.env.MODE
   });
 }
 
-// Production validation
-if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
-  console.error('❌ CRITICAL: VITE_API_URL is not set! API calls will fail.');
-  console.error('👉 Set VITE_API_URL in Vercel Environment Variables');
-  console.error('Example: https://ayvlc6aa4c.execute-api.us-east-1.amazonaws.com/prod');
-}
+// Export base URLs for direct use if needed
+export { API_BASE_URL, LAMBDA_API_BASE_URL };
 
 export const API_CONFIG = {
-  // Base URL for all API calls (AWS API Gateway)
+  // Main backend URL (ASP.NET Core)
   BASE_URL: API_BASE_URL,
   
-  // Auth endpoints (Lambda functions)
+  // Lambda API Gateway URL (auth & upload only)
+  LAMBDA_BASE_URL: LAMBDA_API_BASE_URL,
+  
+  // Auth endpoints (Lambda functions - no /api prefix)
   AUTH: {
-    LOGIN: `${API_BASE_URL}/login`,
-    REGISTER: `${API_BASE_URL}/register`,
+    LOGIN: `${LAMBDA_API_BASE_URL}/login`,
+    REGISTER: `${LAMBDA_API_BASE_URL}/register`,
   },
   
-  // Medical records upload (Lambda function)
+  // Medical records upload (Lambda function - no /api prefix)
   UPLOAD: {
-    MEDICAL_RECORD: `${API_BASE_URL}/upload-medical-record`,
-  }
+    MEDICAL_RECORD: `${LAMBDA_API_BASE_URL}/upload-medical-record`,
+  },
+  
+  // Medical history endpoints (Backend - uses /api prefix with dash)
+  MEDICAL_HISTORY: `${API_BASE_URL}/api/medical-history`,
+  
+  // Medical records endpoints (Backend - uses /api prefix)
+  MEDICAL_RECORDS: `${API_BASE_URL}/api/medicalrecords`,
 };
 
 /**
