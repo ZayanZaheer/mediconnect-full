@@ -40,8 +40,8 @@ export const API_CONFIG = {
   
   // Lambda function endpoints (use these when Lambda URLs are available)
   LAMBDA: {
-    LOGIN: LAMBDA_BASE_URL ? `${LAMBDA_BASE_URL}/login` : null,
-    REGISTER: LAMBDA_BASE_URL ? `${LAMBDA_BASE_URL}/register` : null,
+    LOGIN: LAMBDA_BASE_URL ? `${LAMBDA_BASE_URL}/api/auth/login` : null,
+    REGISTER: LAMBDA_BASE_URL ? `${LAMBDA_BASE_URL}/api/auth/register` : null,
     UPLOAD_MEDICAL_RECORD: LAMBDA_BASE_URL ? `${LAMBDA_BASE_URL}/upload-medical-record` : null,
   }
 };
