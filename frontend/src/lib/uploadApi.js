@@ -23,18 +23,22 @@ export async function uploadProfilePhoto(file) {
 }
 
 /**
- * Upload medical record file
+ * Upload medical record file to S3 via backend
  */
-export async function uploadMedicalRecordFile(file, patientEmail) {
-  // Use Lambda function if available, otherwise fallback to backend
-  const url = API_CONFIG.LAMBDA.UPLOAD_MEDICAL_RECORD || `${API_BASE}/upload/file?type=medical-record`;
-  
+export async function uploadMedicalRecordFile(file, metadata = {}) {
   const formData = new FormData();
   formData.append("file", file);
 
-  // tell backend which bucket/folder this is for
-  formData.append("type", "medical-record");
-  formData.append("patientEmail", patientEmail);
+  // Build query params
+  const params = new URLSearchParams({
+    type: "medical-record",
+    patientEmail: metadata.patientEmail || "",
+    recordType: metadata.recordType || "General",
+    doctorName: metadata.doctorName || "",
+    recordDate: metadata.recordDate || new Date().toISOString()
+  });
+
+  const url = `${API_BASE}/upload/file?${params.toString()}`;
 
   const res = await fetch(url, {
     method: "POST",
@@ -51,11 +55,12 @@ export async function uploadMedicalRecordFile(file, patientEmail) {
 
   const data = await res.json();
 
-  // unify naming for PatientRecords.jsx usage
+  // Return unified format
   return {
-    url: data.url,               // example: /uploads/medical-record/123.pdf
+    url: data.url,
     fileName: file.name,
     contentType: file.type,
     fileSizeBytes: file.size,
   };
 }
+

@@ -13,7 +13,7 @@ import { inputBase } from "../lib/ui.js";
 import { useToast } from "../components/ToastProvider.jsx";
 import { useAuth } from "../context/AuthProvider.jsx";
 import { uploadMedicalRecordFile } from "../lib/uploadApi.js";
-import { fetchMedicalRecords, createMedicalRecord, deleteMedicalRecord } from "../lib/medicalRecordsApi.js";
+import { fetchMedicalRecords, deleteMedicalRecord } from "../lib/medicalRecordsApi.js";
 import { API_CONFIG } from '../config/api.js';
 
 const API_BASE = API_CONFIG.BASE_URL;
@@ -79,51 +79,47 @@ export default function PatientRecords() {
   // Upload file + create record
   // ================================
   async function handleUpload() {
-    if (!file) {
-      return pushToast({ tone: "error", message: "Please select a file." });
-    }
-    if (!meta.date || !meta.doctor) {
-      return pushToast({ tone: "error", message: "Date and doctor are required." });
-    }
-
-    try {
-      // 1. Upload actual file
-      const fileResult = await uploadMedicalRecordFile(file);
-
-      // 2. Create DB record
-      const email = user?.email;
-
-      if (!email) {
-        pushToast({ tone: "error", message: "User email not found" });
-        return;
-      }
-
-      const payload = {
-        patientEmail: email,
-        doctorName: meta.doctor,
-        recordType: meta.type,
-        fileName: file.name,
-        fileUrl: fileResult.url,
-        contentType: file.type,
-        fileSizeBytes: file.size,
-        recordDate: meta.date
-      };
-
-      await createMedicalRecord(payload);
-
-      pushToast({ tone: "success", message: "Record uploaded successfully." });
-
-      // Reload list
-      loadRecords();
-
-      setFile(null);
-      setMeta({ type: "Blood Test", date: "", doctor: "" });
-      setFileKey(Date.now());   // ⬅️ resets file chooser and removes filename from UI
-
-    } catch (err) {
-      pushToast({ tone: "error", message: err.message });
-    }
+  if (!file) {
+    return pushToast({ tone: "error", message: "Please select a file." });
   }
+  if (!meta.date || !meta.doctor) {
+    return pushToast({ tone: "error", message: "Date and doctor are required." });
+  }
+
+  try {
+    const email = user?.email;
+
+    if (!email) {
+      pushToast({ tone: "error", message: "User email not found" });
+      return;
+    }
+
+    // Upload file to S3 with metadata - Lambda will create DB record automatically
+    await uploadMedicalRecordFile(file, {
+      patientEmail: email,
+      recordType: meta.type,
+      doctorName: meta.doctor,
+      recordDate: meta.date
+    });
+
+    pushToast({ tone: "success", message: "Record uploaded successfully. Processing..." });
+
+    // Wait a moment for Lambda to process, then reload
+    setTimeout(() => {
+      loadRecords();
+    }, 2000);
+
+    // Reset form
+    setFile(null);
+    setMeta({ type: "Blood Test", date: "", doctor: "" });
+    setFileKey(Date.now());
+
+  } catch (err) {
+    console.error('Upload error:', err);
+    pushToast({ tone: "error", message: err.message || "Failed to upload" });
+  }
+}
+
 
   // ================================
   // Delete record
