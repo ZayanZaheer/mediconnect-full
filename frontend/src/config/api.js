@@ -4,10 +4,12 @@
  * Uses Vite environment variables (import.meta.env.VITE_API_URL)
  * Falls back to localhost for development if not set
  * 
- * IMPORTANT: On Vercel, set VITE_API_URL in Environment Variables!
+ * IMPORTANT: On Vercel, set VITE_LAMBDA_API_URL for Login/Register/Upload!
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Only fallback to localhost in development, not production
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.DEV ? 'http://localhost:5000' : '');
 
 // Lambda function URLs (AWS API Gateway endpoints)
 const LAMBDA_BASE_URL = import.meta.env.VITE_LAMBDA_API_URL || '';
@@ -23,10 +25,15 @@ if (import.meta.env.DEV) {
   });
 }
 
-// Production warning if API URL not set
-if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
-  console.warn('⚠️ WARNING: VITE_API_URL is not set! API calls will fail.');
-  console.warn('👉 Set VITE_API_URL in Vercel Environment Variables');
+// Production warnings
+if (import.meta.env.PROD) {
+  if (!import.meta.env.VITE_LAMBDA_API_URL) {
+    console.error('❌ CRITICAL: VITE_LAMBDA_API_URL is not set! Login/Register will fail.');
+    console.error('👉 Set VITE_LAMBDA_API_URL in Vercel Environment Variables');
+  }
+  if (!import.meta.env.VITE_API_URL) {
+    console.warn('⚠️ INFO: VITE_API_URL not set. Other API calls (if any) will fail.');
+  }
 }
 
 export const API_CONFIG = {
