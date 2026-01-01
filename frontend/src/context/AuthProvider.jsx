@@ -3,7 +3,6 @@ import { loadAuth, saveAuth, clearAuth } from "../lib/auth";
 import { API_CONFIG } from '../config/api.js';
 
 const AuthCtx = createContext(null);
-const API_BASE = "https://ayvlc6aa4c.execute-api.us-east-1.amazonaws.com/prod/api";
 
 export function AuthProvider({ children }) {
   const [auth, setAuth] = useState(() => loadAuth());
@@ -22,7 +21,7 @@ export function AuthProvider({ children }) {
       //  LOGIN
       // ==========================
       login: async (credentials) => {
-        const response = await fetch(`${API_BASE}/auth/login`, {
+        const response = await fetch(API_CONFIG.AUTH.LOGIN, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(credentials),
