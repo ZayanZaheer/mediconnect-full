@@ -14,6 +14,9 @@
 // Main backend URL (ASP.NET Core on EC2/Express)
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+// Main backend URL with /api prefix (all non-Lambda endpoints)
+const API_API_BASE_URL = `${API_BASE_URL}/api`;
+
 // Lambda API Gateway URL (auth & upload only)
 const LAMBDA_API_BASE_URL = import.meta.env.VITE_LAMBDA_API_URL;
 
@@ -36,6 +39,7 @@ if (!LAMBDA_API_BASE_URL) {
 if (import.meta.env.DEV) {
   console.log('🔧 API Configuration (Dual-Backend Architecture):', {
     API_BASE_URL,
+    API_API_BASE_URL,
     LAMBDA_API_BASE_URL,
     mode: import.meta.env.MODE
   });
@@ -46,7 +50,7 @@ export { API_BASE_URL, LAMBDA_API_BASE_URL };
 
 export const API_CONFIG = {
   // Main backend URL (ASP.NET Core)
-  BASE_URL: API_BASE_URL,
+  BASE_URL: API_API_BASE_URL,
   
   // Lambda API Gateway URL (auth & upload only)
   LAMBDA_BASE_URL: LAMBDA_API_BASE_URL,
@@ -63,10 +67,10 @@ export const API_CONFIG = {
   },
   
   // Medical history endpoints (Backend - uses /api prefix with dash)
-  MEDICAL_HISTORY: `${API_BASE_URL}/api/medical-history`,
+  MEDICAL_HISTORY: `${API_API_BASE_URL}/medical-history`,
   
   // Medical records endpoints (Backend - uses /api prefix)
-  MEDICAL_RECORDS: `${API_BASE_URL}/api/medicalrecords`,
+  MEDICAL_RECORDS: `${API_API_BASE_URL}/medicalrecords`,
 };
 
 /**
