@@ -3,7 +3,7 @@ import { loadAuth, saveAuth, clearAuth } from "../lib/auth";
 import { API_CONFIG } from '../config/api.js';
 
 const AuthCtx = createContext(null);
-const API_BASE = API_CONFIG.BASE_URL;
+const API_BASE = "https://ayvlc6aa4c.execute-api.us-east-1.amazonaws.com/prod/api";
 
 export function AuthProvider({ children }) {
   const [auth, setAuth] = useState(() => loadAuth());
