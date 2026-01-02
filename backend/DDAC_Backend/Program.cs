@@ -2,8 +2,14 @@ using Microsoft.EntityFrameworkCore;
 using DDAC_Backend.Data;
 using DDAC_Backend.Services;
 using System.Text.Json.Serialization;
+using Amazon.S3;
+using Amazon;
+using Amazon.Runtime;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
 
 // Add services to the container
 builder.Services.AddControllers()
@@ -28,6 +34,7 @@ builder.Services.AddDbContext<MediConnectDbContext>(options =>
     }));
 
 // Register Services
+builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
