@@ -146,11 +146,11 @@ public class Function
         ILambdaContext context)
     {
         const string sql = @"
-            INSERT INTO medical_records 
-            (patient_email, doctor_id, doctor_name, record_type, file_name, file_url, content_type, file_size_bytes, record_date, created_at, updated_at)
+            INSERT INTO ""MedicalRecords"" 
+            (""PatientEmail"", ""DoctorId"", ""DoctorName"", ""RecordType"", ""FileName"", ""FileUrl"", ""ContentType"", ""FileSizeBytes"", ""RecordDate"", ""CreatedAt"", ""UpdatedAt"")
             VALUES 
             (@PatientEmail, @DoctorId, @DoctorName, @RecordType, @FileName, @FileUrl, @ContentType, @FileSizeBytes, @RecordDate, @CreatedAt, @UpdatedAt)
-            RETURNING id";
+            RETURNING ""Id""";
 
         try
         {
