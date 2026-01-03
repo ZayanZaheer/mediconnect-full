@@ -26,21 +26,27 @@ public class Function
     public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest request, ILambdaContext context)
     {
         context.Logger.LogInformation("=== HttpUploadHandler Lambda Started ===");
-        context.Logger.LogInformation($"HTTP Method: {request.HttpMethod}");
-        context.Logger.LogInformation($"Path: {request.Path}");
         
         try
         {
+            // HTTP API v2 uses RequestContext.Http.Method, not HttpMethod
+            var httpMethod = request.RequestContext?.Http?.Method?.ToUpper() ?? 
+                            request.HttpMethod?.ToUpper() ?? 
+                            "UNKNOWN";
+            
+            context.Logger.LogInformation($"HTTP Method: {httpMethod}");
+            context.Logger.LogInformation($"Path: {request.Path ?? request.RawPath ?? "unknown"}");
+
             // Handle CORS preflight
-            if (request.HttpMethod == "OPTIONS")
+            if (httpMethod == "OPTIONS")
             {
                 return CorsResponse(200, JsonSerializer.Serialize(new { message = "OK" }));
             }
 
-            if (request.HttpMethod != "POST")
+            if (httpMethod != "POST")
             {
-                context.Logger.LogWarning($"Method not allowed: {request.HttpMethod}");
-                return CorsResponse(405, JsonSerializer.Serialize(new { message = "Method not allowed. Use POST." }));
+                context.Logger.LogWarning($"Method not allowed: {httpMethod}");
+                return CorsResponse(405, JsonSerializer.Serialize(new { message = $"Method not allowed. Expected POST, got {httpMethod}" }));
             }
 
             // Get query parameters
@@ -58,7 +64,6 @@ public class Function
                 return CorsResponse(400, JsonSerializer.Serialize(new { message = "Patient email is required" }));
             }
 
-            // Get the uploaded file from the request body
             if (string.IsNullOrEmpty(request.Body))
             {
                 return CorsResponse(400, JsonSerializer.Serialize(new { message = "Request body is empty" }));
@@ -68,19 +73,29 @@ public class Function
             string fileName = "medical-record.pdf";
             string fileContentType = "application/pdf";
 
-            // Parse multipart form data
+            // Get Content-Type
+            var contentType = "";
+            if (request.Headers != null)
+            {
+                foreach (var header in request.Headers)
+                {
+                    if (header.Key.Equals("content-type", StringComparison.OrdinalIgnoreCase))
+                    {
+                        contentType = header.Value;
+                        break;
+                    }
+                }
+            }
+
             if (request.IsBase64Encoded)
             {
-                context.Logger.LogInformation("Decoding base64 body...");
                 var bodyBytes = Convert.FromBase64String(request.Body);
-                context.Logger.LogInformation($"Decoded body size: {bodyBytes.Length} bytes");
+                context.Logger.LogInformation($"Decoded {bodyBytes.Length} bytes");
 
-                // Get boundary from Content-Type header
-                var boundary = GetBoundary(request.Headers);
+                var boundary = GetBoundary(contentType);
                 
                 if (!string.IsNullOrEmpty(boundary))
                 {
-                    context.Logger.LogInformation($"Parsing multipart with boundary: {boundary}");
                     var filePart = ParseMultipartFormData(bodyBytes, boundary, context);
                     
                     if (filePart != null)
@@ -88,23 +103,20 @@ public class Function
                         fileBytes = filePart.Data;
                         fileName = filePart.FileName ?? fileName;
                         fileContentType = filePart.ContentType ?? fileContentType;
-                        context.Logger.LogInformation($"File extracted: {fileName}, Size: {fileBytes.Length} bytes, Type: {fileContentType}");
                     }
                     else
                     {
-                        return CorsResponse(400, JsonSerializer.Serialize(new { message = "Failed to extract file from multipart data" }));
+                        return CorsResponse(400, JsonSerializer.Serialize(new { message = "Failed to parse file" }));
                     }
                 }
                 else
                 {
-                    // If no boundary, assume entire body is the file
-                    context.Logger.LogInformation("No boundary found, using entire body as file");
                     fileBytes = bodyBytes;
                 }
             }
             else
             {
-                return CorsResponse(400, JsonSerializer.Serialize(new { message = "Request body must be base64 encoded" }));
+                return CorsResponse(400, JsonSerializer.Serialize(new { message = "Body must be base64 encoded" }));
             }
 
             if (fileBytes == null || fileBytes.Length == 0)
@@ -112,37 +124,28 @@ public class Function
                 return CorsResponse(400, JsonSerializer.Serialize(new { message = "File is empty" }));
             }
 
-            // Validate file size (max 10MB)
-            const long maxFileSize = 10 * 1024 * 1024;
-            if (fileBytes.Length > maxFileSize)
+            // Validate size
+            if (fileBytes.Length > 10 * 1024 * 1024)
             {
-                return CorsResponse(400, JsonSerializer.Serialize(new { message = "File size exceeds 10MB limit." }));
+                return CorsResponse(400, JsonSerializer.Serialize(new { message = "File too large (max 10MB)" }));
             }
 
-            // Generate unique S3 key
+            // Generate S3 key
             var fileExtension = Path.GetExtension(fileName);
             if (string.IsNullOrEmpty(fileExtension))
             {
-                fileExtension = fileContentType.Contains("pdf") ? ".pdf" : 
-                               fileContentType.Contains("image") ? ".jpg" : ".bin";
+                fileExtension = fileContentType.Contains("pdf") ? ".pdf" : ".jpg";
             }
             
             var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
             var s3Key = $"patients/{patientEmail.Trim().ToLowerInvariant()}/{uniqueFileName}";
 
-            context.Logger.LogInformation($"Uploading to S3: s3://{BUCKET_NAME}/{s3Key}");
+            context.Logger.LogInformation($"Uploading to S3: {s3Key}");
 
-            // Parse record date
             DateTime parsedRecordDate = DateTime.UtcNow;
-            if (!string.IsNullOrEmpty(recordDate))
-            {
-                if (!DateTime.TryParse(recordDate, out parsedRecordDate))
-                {
-                    parsedRecordDate = DateTime.UtcNow;
-                }
-            }
+            DateTime.TryParse(recordDate, out parsedRecordDate);
 
-            // Upload to S3 with metadata (this will trigger the UploadMedicalRecord Lambda)
+            // Upload to S3
             using (var stream = new MemoryStream(fileBytes))
             {
                 var uploadRequest = new PutObjectRequest
@@ -164,24 +167,22 @@ public class Function
                 };
 
                 var response = await _s3Client.PutObjectAsync(uploadRequest);
-                context.Logger.LogInformation($"S3 Upload Response: {response.HttpStatusCode}");
 
                 if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
                 {
                     var fileUrl = $"https://{BUCKET_NAME}.s3.amazonaws.com/{s3Key}";
-                    context.Logger.LogInformation($"✅ Upload successful: {fileUrl}");
+                    context.Logger.LogInformation($"✅ Success: {fileUrl}");
 
                     return CorsResponse(200, JsonSerializer.Serialize(new
                     {
                         url = fileUrl,
-                        message = "File uploaded successfully. Processing in background.",
+                        message = "File uploaded successfully",
                         fileName = fileName,
                         uploadedAt = DateTime.UtcNow
                     }));
                 }
                 else
                 {
-                    context.Logger.LogError($"S3 upload failed: {response.HttpStatusCode}");
                     return CorsResponse(500, JsonSerializer.Serialize(new { message = "S3 upload failed" }));
                 }
             }
@@ -189,34 +190,21 @@ public class Function
         catch (Exception ex)
         {
             context.Logger.LogError($"❌ Error: {ex.Message}");
-            context.Logger.LogError($"Stack trace: {ex.StackTrace}");
-            return CorsResponse(500, JsonSerializer.Serialize(new 
-            { 
-                message = "Internal server error",
-                error = ex.Message 
-            }));
+            return CorsResponse(500, JsonSerializer.Serialize(new { message = "Error", error = ex.Message }));
         }
     }
 
-    private string GetBoundary(IDictionary<string, string> headers)
+    private string GetBoundary(string contentType)
     {
-        if (headers == null) return null;
+        if (string.IsNullOrEmpty(contentType)) return null;
         
-        foreach (var header in headers)
+        var parts = contentType.Split(';');
+        foreach (var part in parts)
         {
-            if (header.Key.Equals("content-type", StringComparison.OrdinalIgnoreCase) ||
-                header.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
+            var trimmed = part.Trim();
+            if (trimmed.StartsWith("boundary=", StringComparison.OrdinalIgnoreCase))
             {
-                var parts = header.Value.Split(';');
-                foreach (var part in parts)
-                {
-                    var trimmed = part.Trim();
-                    if (trimmed.StartsWith("boundary=", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var boundary = trimmed.Substring(9).Trim('"', ' ');
-                        return boundary;
-                    }
-                }
+                return trimmed.Substring(9).Trim('"', ' ');
             }
         }
         return null;
@@ -226,23 +214,18 @@ public class Function
     {
         try
         {
-            var boundaryMarker = $"--{boundary}";
             var dataStr = Encoding.UTF8.GetString(data);
-            
-            // Split by boundary
-            var parts = dataStr.Split(new[] { boundaryMarker }, StringSplitOptions.None);
+            var parts = dataStr.Split(new[] { $"--{boundary}" }, StringSplitOptions.None);
             
             foreach (var part in parts)
             {
                 if (string.IsNullOrWhiteSpace(part) || part.Trim() == "--") continue;
                 
-                if (part.Contains("Content-Disposition") && part.Contains("filename"))
+                if (part.Contains("filename"))
                 {
-                    // Extract filename
                     var filenameMatch = System.Text.RegularExpressions.Regex.Match(part, @"filename=""([^""]+)""");
-                    var filename = filenameMatch.Success ? filenameMatch.Groups[1].Value : "unknown";
+                    var filename = filenameMatch.Success ? filenameMatch.Groups[1].Value : "file";
                     
-                    // Extract content type
                     var fileContentType = "application/octet-stream";
                     var ctMatch = System.Text.RegularExpressions.Regex.Match(part, @"Content-Type:\s*(.+?)(?:\r\n|\n)");
                     if (ctMatch.Success)
@@ -250,24 +233,18 @@ public class Function
                         fileContentType = ctMatch.Groups[1].Value.Trim();
                     }
                     
-                    // Find the binary data (after double CRLF or double LF)
                     var headerEnd = part.IndexOf("\r\n\r\n");
                     if (headerEnd == -1) headerEnd = part.IndexOf("\n\n");
                     
                     if (headerEnd != -1)
                     {
                         var dataStart = headerEnd + (part[headerEnd] == '\r' ? 4 : 2);
-                        
-                        // Find the end (before closing boundary or end of string)
                         var dataEnd = part.Length;
                         var endMarker = part.LastIndexOf("\r\n");
                         if (endMarker > dataStart) dataEnd = endMarker;
                         
-                        // Extract binary data
                         var fileDataStr = part.Substring(dataStart, dataEnd - dataStart);
                         var fileBytes = Encoding.Latin1.GetBytes(fileDataStr);
-                        
-                        context.Logger.LogInformation($"Extracted file: {filename}, {fileBytes.Length} bytes, {fileContentType}");
                         
                         return new FilePart
                         {
@@ -283,7 +260,7 @@ public class Function
         }
         catch (Exception ex)
         {
-            context.Logger.LogError($"Error parsing multipart: {ex.Message}");
+            context.Logger.LogError($"Parse error: {ex.Message}");
             return null;
         }
     }
