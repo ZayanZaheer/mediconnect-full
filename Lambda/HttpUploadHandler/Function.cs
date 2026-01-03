@@ -152,7 +152,6 @@ public class Function
                     Key = s3Key,
                     InputStream = stream,
                     ContentType = fileContentType,
-                    CannedACL = S3CannedACL.PublicRead,
                     Metadata =
                     {
                         ["patientemail"] = patientEmail.Trim().ToLowerInvariant(),
