@@ -645,7 +645,7 @@ export default function PatientDashboard() {
                       <div className="text-sm">
                         <div className="font-medium text-slate-800">{p.medicine}</div>
                         <div className="text-slate-500">
-                          {formatPatientDate(p.date)} • {p.doctor}
+                          {formatPatientDate(p.date)} • {p.doctorName || p.doctor || "Unknown Doctor"}
                         </div>
                       </div>
                       <Link to="/patient/prescriptions" className="text-emerald-700 hover:underline text-sm">

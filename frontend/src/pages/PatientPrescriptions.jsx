@@ -12,7 +12,7 @@ import { formatPatientDate } from "../lib/date.js";
 import { inputWithIcon } from "../lib/ui.js";
 import { fetchMedicalHistory } from "../lib/medicalApi.js";
 import { useAuth } from "../context/AuthProvider.jsx";
-
+import { Search, Eye, X, Download } from "lucide-react";
 // BACKEND base URL helper - use relative path for production compatibility
 const backendUrl = "";
 
@@ -210,13 +210,16 @@ export default function PatientPrescriptions() {
         {open && (
           <Modal title="Prescription Details" onClose={() => setOpen(null)} footer={
             <Button
-              as="a"
-              href={fullUrl(open.fileUrl)}
-              target="_blank"
-              download
+              onClick={() => {
+                if (open.fileUrl) {
+                  const url = fullUrl(open.fileUrl);
+                  window.open(url, '_blank');
+                }
+              }}
               className="bg-emerald-600 text-white hover:bg-emerald-700"
               disabled={!open.fileUrl}
             >
+              <Download className="mr-2 h-4 w-4" />
               Download PDF
             </Button>
 
