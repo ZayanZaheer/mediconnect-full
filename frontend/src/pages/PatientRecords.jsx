@@ -105,9 +105,15 @@ export default function PatientRecords() {
     pushToast({ tone: "success", message: "Record uploaded successfully. Processing..." });
 
     // Wait a moment for Lambda to process, then reload
-    setTimeout(() => {
-      loadRecords();
-    }, 2000);
+    let pollAttempts = 0;
+    const pollInterval = setInterval(async () => {
+      pollAttempts++;
+      await loadRecords();
+      
+      if (pollAttempts >= 5) {
+        clearInterval(pollInterval);
+      }
+    }, 2000); // Check every 2 seconds, 5 times total (10 seconds)
 
     // Reset form
     setFile(null);
