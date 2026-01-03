@@ -260,10 +260,18 @@ export default function PatientRecords() {
 
               <div className="p-4">
                 {preview.contentType === "application/pdf" ? (
-                  <iframe
-                    src={preview.fileUrl}
+                  <object
+                    data={preview.fileUrl}
+                    type="application/pdf"
                     className="w-full h-[600px] border rounded"
-                  />
+                  >
+                    <p className="p-4 text-center">
+                      PDF preview unavailable. 
+                      <a href={preview.fileUrl} target="_blank" rel="noopener noreferrer" className="text-emerald-600 underline ml-1">
+                        Click here to view
+                      </a>
+                    </p>
+                  </object>
                 ) : preview.contentType?.startsWith("image/") ? (
                   <img
                     src={preview.fileUrl}
