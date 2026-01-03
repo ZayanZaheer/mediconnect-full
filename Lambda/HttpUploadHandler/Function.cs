@@ -23,19 +23,17 @@ public class Function
         _s3Client = new AmazonS3Client();
     }
 
-    public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest request, ILambdaContext context)
+    // Changed to APIGatewayHttpApiV2ProxyRequest for HTTP API v2
+    public async Task<APIGatewayHttpApiV2ProxyResponse> FunctionHandler(APIGatewayHttpApiV2ProxyRequest request, ILambdaContext context)
     {
         context.Logger.LogInformation("=== HttpUploadHandler Lambda Started ===");
         
         try
         {
-            // HTTP API v2 uses RequestContext.Http.Method, not HttpMethod
-            var httpMethod = request.RequestContext?.Http?.Method?.ToUpper() ?? 
-                            request.HttpMethod?.ToUpper() ?? 
-                            "UNKNOWN";
+            var httpMethod = request.RequestContext?.Http?.Method?.ToUpper() ?? "UNKNOWN";
             
             context.Logger.LogInformation($"HTTP Method: {httpMethod}");
-            context.Logger.LogInformation($"Path: {request.Path ?? request.RawPath ?? "unknown"}");
+            context.Logger.LogInformation($"Path: {request.RawPath ?? "unknown"}");
 
             // Handle CORS preflight
             if (httpMethod == "OPTIONS")
@@ -265,9 +263,9 @@ public class Function
         }
     }
 
-    private APIGatewayProxyResponse CorsResponse(int statusCode, string body)
+    private APIGatewayHttpApiV2ProxyResponse CorsResponse(int statusCode, string body)
     {
-        return new APIGatewayProxyResponse
+        return new APIGatewayHttpApiV2ProxyResponse
         {
             StatusCode = statusCode,
             Headers = new Dictionary<string, string>
