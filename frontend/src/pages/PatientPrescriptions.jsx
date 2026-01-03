@@ -12,7 +12,7 @@ import { formatPatientDate } from "../lib/date.js";
 import { inputWithIcon } from "../lib/ui.js";
 import { fetchMedicalHistory } from "../lib/medicalApi.js";
 import { useAuth } from "../context/AuthProvider.jsx";
-import { Search, Eye, X, Download } from "lucide-react";
+import { Download } from "lucide-react";
 // BACKEND base URL helper - use relative path for production compatibility
 const backendUrl = "";
 
