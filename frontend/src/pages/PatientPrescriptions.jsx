@@ -211,6 +211,7 @@ export default function PatientPrescriptions() {
                 if (open.fileUrl) {
                   try {
                     const url = fullUrl(open.fileUrl);
+                    
                     // Fetch with ngrok header to bypass warning
                     const response = await fetch(url, {
                       headers: {
@@ -218,14 +219,28 @@ export default function PatientPrescriptions() {
                       }
                     });
                     
-                    if (!response.ok) throw new Error('Failed to fetch PDF');
+                    if (!response.ok) {
+                      throw new Error(`HTTP error! status: ${response.status}`);
+                    }
                     
+                    // Create blob from response
                     const blob = await response.blob();
+                    
+                    // Create a download link instead of opening in new tab
                     const blobUrl = window.URL.createObjectURL(blob);
-                    window.open(blobUrl, '_blank');
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = `prescription-${open.id}.pdf`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Clean up the blob URL
+                    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100);
+                    
                   } catch (error) {
-                    console.error('Error opening PDF:', error);
-                    alert('Failed to open PDF. Please try again.');
+                    console.error('Error downloading PDF:', error);
+                    alert('Failed to download PDF. Please try again.');
                   }
                 }
               }}
