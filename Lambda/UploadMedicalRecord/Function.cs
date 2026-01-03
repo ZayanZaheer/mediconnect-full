@@ -58,6 +58,13 @@ public class Function
                 
                 context.Logger.LogInformation("✅ Successfully retrieved S3 metadata");
                 
+                // Debug: Log all metadata keys
+                context.Logger.LogInformation($"Metadata count: {metadata.Metadata.Count}");
+                foreach (var key in metadata.Metadata.Keys)
+                {
+                    context.Logger.LogInformation($"Metadata key: '{key}' = '{metadata.Metadata[key]}'");
+                }
+                
                 // Extract metadata
                 var patientEmail = GetMetadata(metadata.Metadata, "patientemail");
                 var recordType = GetMetadata(metadata.Metadata, "recordtype") ?? "General";
@@ -129,9 +136,13 @@ public class Function
 
     private string GetMetadata(MetadataCollection metadata, string key)
     {
+        // S3 metadata keys are stored with x-amz-meta- prefix and in lowercase
+        var searchKey = $"x-amz-meta-{key}";
+        
         foreach (var kvp in metadata.Keys)
         {
-            if (kvp.Equals(key, StringComparison.OrdinalIgnoreCase))
+            if (kvp.Equals(key, StringComparison.OrdinalIgnoreCase) ||
+                kvp.Equals(searchKey, StringComparison.OrdinalIgnoreCase))
             {
                 return metadata[kvp];
             }
