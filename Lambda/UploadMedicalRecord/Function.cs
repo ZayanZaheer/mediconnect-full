@@ -60,9 +60,9 @@ public class Function
                 
                 // Debug: Log all metadata keys
                 context.Logger.LogInformation($"Metadata count: {metadata.Metadata.Count}");
-                foreach (var key in metadata.Metadata.Keys)
+                foreach (var metaKey in metadata.Metadata.Keys)
                 {
-                    context.Logger.LogInformation($"Metadata key: '{key}' = '{metadata.Metadata[key]}'");
+                    context.Logger.LogInformation($"Metadata key: '{metaKey}' = '{metadata.Metadata[metaKey]}'");
                 }
                 
                 // Extract metadata
