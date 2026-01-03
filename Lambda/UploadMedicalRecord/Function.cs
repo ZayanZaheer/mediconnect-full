@@ -45,6 +45,8 @@ public class Function
                 context.Logger.LogInformation($"Processing: s3://{bucket}/{key}");
                 context.Logger.LogInformation($"File size: {fileSize} bytes");
 
+                context.Logger.LogInformation("About to fetch S3 object metadata...");
+                
                 // Get object metadata
                 var metadataRequest = new GetObjectMetadataRequest
                 {
@@ -53,6 +55,8 @@ public class Function
                 };
 
                 var metadata = await _s3Client.GetObjectMetadataAsync(metadataRequest);
+                
+                context.Logger.LogInformation("✅ Successfully retrieved S3 metadata");
                 
                 // Extract metadata
                 var patientEmail = GetMetadata(metadata.Metadata, "patientemail");
@@ -94,6 +98,8 @@ public class Function
                 // Generate file URL
                 var fileUrl = $"https://{bucket}.s3.amazonaws.com/{key}";
 
+                context.Logger.LogInformation("About to connect to database...");
+                
                 // Insert into database
                 await InsertMedicalRecordAsync(
                     patientEmail,
@@ -154,8 +160,15 @@ public class Function
 
         try
         {
+            context.Logger.LogInformation($"Connection string: {_connectionString.Replace("Password=password123", "Password=***")}");
+            context.Logger.LogInformation("Creating connection...");
+            
             using var conn = new NpgsqlConnection(_connectionString);
+            
+            context.Logger.LogInformation("Opening connection...");
             await conn.OpenAsync();
+            
+            context.Logger.LogInformation("✅ Database connection opened successfully");
 
             using var cmd = new NpgsqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@PatientEmail", patientEmail.ToLowerInvariant());
@@ -170,12 +183,14 @@ public class Function
             cmd.Parameters.AddWithValue("@CreatedAt", DateTime.UtcNow);
             cmd.Parameters.AddWithValue("@UpdatedAt", DateTime.UtcNow);
 
+            context.Logger.LogInformation("Executing SQL...");
             var recordId = await cmd.ExecuteScalarAsync();
-            context.Logger.LogInformation($"Inserted medical record with ID: {recordId}");
+            context.Logger.LogInformation($"✅ Inserted medical record with ID: {recordId}");
         }
         catch (Exception ex)
         {
-            context.Logger.LogError($"Database error: {ex.Message}");
+            context.Logger.LogError($"❌ Database error: {ex.Message}");
+            context.Logger.LogError($"Exception type: {ex.GetType().Name}");
             throw;
         }
     }
