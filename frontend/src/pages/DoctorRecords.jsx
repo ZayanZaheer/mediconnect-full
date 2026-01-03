@@ -74,10 +74,20 @@ export default function DoctorRecords() {
     consultationMemos,
     doctorSessions,
     appointments, // only used to build patient dropdown
+    doctors,
   } = useClinicData();
 
-  const doctorId = user?.id;
-  const doctorNameLower = user?.name?.toLowerCase();
+  const doctorProfile = useMemo(() => {
+    if (!user?.email || !doctors) return null;
+    
+    // Match by email (case-insensitive)
+    return doctors.find(
+      (d) => d.email?.toLowerCase() === user.email.toLowerCase()
+    );
+  }, [doctors, user]);
+
+  const doctorId = doctorProfile?.id; 
+  const doctorName = doctorProfile?.name || user?.name;
 
   // --------------------------------------------------
   // UI State
@@ -108,7 +118,7 @@ export default function DoctorRecords() {
     const map = new Map();
 
     appointments.forEach((appt) => {
-      if ((appt.doctorName || "").toLowerCase() !== doctorNameLower) return;
+      if (appt.doctorId !== doctorId) return;
       if (!appt.patientEmail) return;
       map.set(
         appt.patientEmail.toLowerCase(),
@@ -123,7 +133,7 @@ export default function DoctorRecords() {
     });
 
     return [...map.entries()].map(([value, label]) => ({ value, label }));
-  }, [appointments, history, doctorNameLower]);
+  }, [appointments, history, doctorId]);
 
   // Auto-select first patient
   useEffect(() => {
@@ -182,6 +192,13 @@ export default function DoctorRecords() {
   // SAVE NOTE
   // --------------------------------------------------
   async function saveNote() {
+    console.log("=== SAVE NOTE DEBUG ===");
+    console.log("canWrite:", canWrite);
+    console.log("doctorBusy:", doctorBusy);
+    console.log("activeMemo:", activeMemo);
+    console.log("doctorId:", doctorId);
+    console.log("selectedPatient:", selectedPatient);
+
     if (!canWrite) {
       pushToast({
         tone: "error",
@@ -226,6 +243,13 @@ export default function DoctorRecords() {
   // SAVE PRESCRIPTION
   // --------------------------------------------------
   async function saveRx() {
+    console.log("=== SAVE RX DEBUG ===");
+    console.log("canWrite:", canWrite);
+    console.log("doctorBusy:", doctorBusy);
+    console.log("activeMemo:", activeMemo);
+    console.log("doctorId:", doctorId);
+    console.log("selectedPatient:", selectedPatient);
+    
     if (!canWrite) {
       pushToast({
         tone: "error",

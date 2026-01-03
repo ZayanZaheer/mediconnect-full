@@ -232,30 +232,36 @@ export default function PatientDashboard() {
                     <p className="mt-1 text-sm text-amber-800">
                       With <span className="font-semibold">{activeMemo.doctorName}</span> • Original Memo #{activeMemo.memoNumber}
                     </p>
-                    {activeMemo.rescheduledTo ? (
-                      <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                        <p className="text-sm font-semibold text-amber-900">New appointment time:</p>
-                        <p className="text-base font-bold text-amber-900 mt-1">
-                          {(() => {
-                            const parts = activeMemo.rescheduledTo.split(' ');
-                            const datePart = parts[0];
-                            const timePart = parts[1] || '';
-                            return `${formatPatientDate(datePart)} at ${timePart}`;
-                          })()}
-                        </p>
-                        {activeMemo.note && (
-                          <p className="text-xs text-amber-700 mt-2">
-                            <strong>Note:</strong> {activeMemo.note}
+                      {activeMemo.rescheduledTo ? (
+                        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                          <p className="text-sm font-semibold text-amber-900">New appointment time:</p>
+                          <p className="text-base font-bold text-amber-900 mt-1">
+                            {(() => {
+                              const parts = activeMemo.rescheduledTo.split(' ');
+                              const datePart = parts[0];
+                              const timePart = parts[1] || '';
+                              
+                              // Only show "at [time]" if time is actually provided
+                              if (timePart && timePart.trim() !== '') {
+                                return `${formatPatientDate(datePart)} at ${timePart}`;
+                              } else {
+                                return formatPatientDate(datePart);
+                              }
+                            })()}
                           </p>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                        <p className="text-sm text-amber-800">
-                          {activeMemo.note || "The clinic will contact you with a new appointment time."}
-                        </p>
-                      </div>
-                    )}
+                          {activeMemo.note && (
+                            <p className="text-xs text-amber-700 mt-2">
+                              <strong>Note:</strong> {activeMemo.note}
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                          <p className="text-sm text-amber-800">
+                            {activeMemo.note || "The clinic will contact you with a new appointment time."}
+                          </p>
+                        </div>
+                      )}
                   </>
                 ) : (
                   <>
@@ -598,24 +604,42 @@ export default function PatientDashboard() {
                 <div className="text-sm text-slate-500">Loading…</div>
               ) : (
                 <>
+                  {/* Medical Records */}
                   {records.slice(0, 2).map((r) => (
                     <div key={r.id} className="flex items-center justify-between">
                       <div className="text-sm">
-                        <div className="font-medium text-slate-800">{r.kind}</div>
-                        <div className="text-slate-500">{formatPatientDate(r.date)} • {r.by}</div>
+                        <div className="font-medium text-slate-800">{r.recordType}</div>
+                        <div className="text-slate-500">
+                          {formatPatientDate(r.recordDate)} • {r.doctorName}
+                        </div>
                       </div>
-                      <Link to="/patient/records" className="text-emerald-700 hover:underline text-sm">View</Link>
+                      <Link to="/patient/records" className="text-emerald-700 hover:underline text-sm">
+                        View
+                      </Link>
                     </div>
                   ))}
+                  
+                  {/* Prescriptions */}
                   {prescriptions.slice(0, 2).map((p) => (
                     <div key={p.id} className="flex items-center justify-between">
                       <div className="text-sm">
                         <div className="font-medium text-slate-800">{p.name}</div>
-                        <div className="text-slate-500">{formatPatientDate(p.date)} • {p.doctor}</div>
+                        <div className="text-slate-500">
+                          {formatPatientDate(p.date)} • {p.doctor}
+                        </div>
                       </div>
-                      <Link to="/patient/prescriptions" className="text-emerald-700 hover:underline text-sm">View</Link>
+                      <Link to="/patient/prescriptions" className="text-emerald-700 hover:underline text-sm">
+                        View
+                      </Link>
                     </div>
                   ))}
+                  
+                  {/* Empty state */}
+                  {records.length === 0 && prescriptions.length === 0 && (
+                    <div className="text-sm text-slate-500">
+                      No documents or prescriptions yet.
+                    </div>
+                  )}
                 </>
               )}
             </div>
