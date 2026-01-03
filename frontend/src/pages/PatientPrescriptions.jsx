@@ -207,10 +207,26 @@ export default function PatientPrescriptions() {
         {open && (
           <Modal title="Prescription Details" onClose={() => setOpen(null)} footer={
             <Button
-              onClick={() => {
+              onClick={async () => {
                 if (open.fileUrl) {
-                  const url = fullUrl(open.fileUrl);
-                  window.open(url, '_blank');
+                  try {
+                    const url = fullUrl(open.fileUrl);
+                    // Fetch with ngrok header to bypass warning
+                    const response = await fetch(url, {
+                      headers: {
+                        'ngrok-skip-browser-warning': 'true'
+                      }
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to fetch PDF');
+                    
+                    const blob = await response.blob();
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    window.open(blobUrl, '_blank');
+                  } catch (error) {
+                    console.error('Error opening PDF:', error);
+                    alert('Failed to open PDF. Please try again.');
+                  }
                 }
               }}
               className="bg-emerald-600 text-white hover:bg-emerald-700"
@@ -251,11 +267,11 @@ export default function PatientPrescriptions() {
 
               {/* PDF PREVIEW */}
               {open.fileUrl ? (
-                <iframe
-                  src={fullUrl(open.fileUrl)}   // <-- FIXED
-                  className="w-full h-64 border rounded mt-3"
-                  title="PDF preview"
-                />
+                <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm text-slate-600 mb-2">
+                    Click "Download PDF" button above to view the prescription document.
+                  </p>
+                </div>
               ) : (
                 <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
                   PDF not attached.
