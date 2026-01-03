@@ -158,7 +158,10 @@ public class Function
                     Key = s3Key,
                     InputStream = stream,
                     ContentType = fileContentType,
-                    ContentDisposition = $"inline; filename=\"{Path.GetFileName(fileName)}\"",
+                    Headers =
+                    {
+                        ["Content-Disposition"] = $"inline; filename=\"{Path.GetFileName(fileName)}\""
+                    },
                     Metadata =
                     {
                         ["patientemail"] = patientEmail.Trim().ToLowerInvariant(),
