@@ -29,11 +29,6 @@ public class Function
         context.Logger.LogInformation($"HTTP Method: {request.HttpMethod}");
         context.Logger.LogInformation($"Path: {request.Path}");
         
-        var contentType = request.Headers != null && request.Headers.ContainsKey("content-type") 
-            ? request.Headers["content-type"] 
-            : "not-set";
-        context.Logger.LogInformation($"Content-Type: {contentType}");
-
         try
         {
             // Handle CORS preflight
@@ -44,7 +39,8 @@ public class Function
 
             if (request.HttpMethod != "POST")
             {
-                return CorsResponse(405, JsonSerializer.Serialize(new { message = "Method not allowed" }));
+                context.Logger.LogWarning($"Method not allowed: {request.HttpMethod}");
+                return CorsResponse(405, JsonSerializer.Serialize(new { message = "Method not allowed. Use POST." }));
             }
 
             // Get query parameters
@@ -116,11 +112,19 @@ public class Function
                 return CorsResponse(400, JsonSerializer.Serialize(new { message = "File is empty" }));
             }
 
+            // Validate file size (max 10MB)
+            const long maxFileSize = 10 * 1024 * 1024;
+            if (fileBytes.Length > maxFileSize)
+            {
+                return CorsResponse(400, JsonSerializer.Serialize(new { message = "File size exceeds 10MB limit." }));
+            }
+
             // Generate unique S3 key
             var fileExtension = Path.GetExtension(fileName);
             if (string.IsNullOrEmpty(fileExtension))
             {
-                fileExtension = fileContentType.Contains("pdf") ? ".pdf" : ".bin";
+                fileExtension = fileContentType.Contains("pdf") ? ".pdf" : 
+                               fileContentType.Contains("image") ? ".jpg" : ".bin";
             }
             
             var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
@@ -153,7 +157,9 @@ public class Function
                         ["recordtype"] = recordType,
                         ["recorddate"] = parsedRecordDate.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                         ["doctorid"] = "",
-                        ["doctorname"] = doctorName
+                        ["doctorname"] = doctorName,
+                        ["filename"] = fileName,
+                        ["filesizebytes"] = fileBytes.Length.ToString()
                     }
                 };
 
@@ -220,48 +226,48 @@ public class Function
     {
         try
         {
-            var boundaryBytes = Encoding.UTF8.GetBytes("--" + boundary);
+            var boundaryMarker = $"--{boundary}";
             var dataStr = Encoding.UTF8.GetString(data);
             
-            // Find file part
-            var parts = dataStr.Split(new[] { "--" + boundary }, StringSplitOptions.RemoveEmptyEntries);
+            // Split by boundary
+            var parts = dataStr.Split(new[] { boundaryMarker }, StringSplitOptions.None);
             
             foreach (var part in parts)
             {
+                if (string.IsNullOrWhiteSpace(part) || part.Trim() == "--") continue;
+                
                 if (part.Contains("Content-Disposition") && part.Contains("filename"))
                 {
                     // Extract filename
-                    var filenameStart = part.IndexOf("filename=\"") + 10;
-                    var filenameEnd = part.IndexOf("\"", filenameStart);
-                    var filename = part.Substring(filenameStart, filenameEnd - filenameStart);
+                    var filenameMatch = System.Text.RegularExpressions.Regex.Match(part, @"filename=""([^""]+)""");
+                    var filename = filenameMatch.Success ? filenameMatch.Groups[1].Value : "unknown";
                     
                     // Extract content type
                     var fileContentType = "application/octet-stream";
-                    if (part.Contains("Content-Type:"))
+                    var ctMatch = System.Text.RegularExpressions.Regex.Match(part, @"Content-Type:\s*(.+?)(?:\r\n|\n)");
+                    if (ctMatch.Success)
                     {
-                        var ctStart = part.IndexOf("Content-Type:") + 13;
-                        var ctEnd = part.IndexOf("\r\n", ctStart);
-                        if (ctEnd == -1) ctEnd = part.IndexOf("\n", ctStart);
-                        fileContentType = part.Substring(ctStart, ctEnd - ctStart).Trim();
+                        fileContentType = ctMatch.Groups[1].Value.Trim();
                     }
                     
-                    // Find the binary data (after double CRLF)
-                    var dataStart = part.IndexOf("\r\n\r\n");
-                    if (dataStart == -1) dataStart = part.IndexOf("\n\n");
+                    // Find the binary data (after double CRLF or double LF)
+                    var headerEnd = part.IndexOf("\r\n\r\n");
+                    if (headerEnd == -1) headerEnd = part.IndexOf("\n\n");
                     
-                    if (dataStart != -1)
+                    if (headerEnd != -1)
                     {
-                        dataStart += 4; // Skip the double CRLF
+                        var dataStart = headerEnd + (part[headerEnd] == '\r' ? 4 : 2);
                         
-                        // Find the end (before the closing boundary)
-                        var dataEnd = part.LastIndexOf("\r\n--");
-                        if (dataEnd == -1) dataEnd = part.Length;
+                        // Find the end (before closing boundary or end of string)
+                        var dataEnd = part.Length;
+                        var endMarker = part.LastIndexOf("\r\n");
+                        if (endMarker > dataStart) dataEnd = endMarker;
                         
-                        // Convert back to bytes for the file data portion
+                        // Extract binary data
                         var fileDataStr = part.Substring(dataStart, dataEnd - dataStart);
-                        var fileBytes = Encoding.Latin1.GetBytes(fileDataStr); // Use Latin1 to preserve binary data
+                        var fileBytes = Encoding.Latin1.GetBytes(fileDataStr);
                         
-                        context.Logger.LogInformation($"Extracted file: {filename}, {fileBytes.Length} bytes");
+                        context.Logger.LogInformation($"Extracted file: {filename}, {fileBytes.Length} bytes, {fileContentType}");
                         
                         return new FilePart
                         {
