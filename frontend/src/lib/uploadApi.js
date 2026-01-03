@@ -31,14 +31,14 @@ export async function uploadMedicalRecordFile(file, metadata = {}) {
 
   // Build query params
   const params = new URLSearchParams({
-    type: "medical-record",
     patientEmail: metadata.patientEmail || "",
     recordType: metadata.recordType || "General",
     doctorName: metadata.doctorName || "",
     recordDate: metadata.recordDate || new Date().toISOString()
   });
 
-  const url = `${API_CONFIG.BASE_URL}/upload/file?${params.toString()}`;
+  // USE THE LAMBDA ENDPOINT
+  const url = `${API_CONFIG.UPLOAD.MEDICAL_RECORD}?${params.toString()}`;
 
   const res = await fetch(url, {
     method: "POST",
@@ -55,7 +55,6 @@ export async function uploadMedicalRecordFile(file, metadata = {}) {
 
   const data = await res.json();
   
-  // Return unified format
   return {
     url: data.url,
     fileName: file.name,
