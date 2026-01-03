@@ -237,16 +237,36 @@ export default function PatientDashboard() {
                           <p className="text-sm font-semibold text-amber-900">New appointment time:</p>
                           <p className="text-base font-bold text-amber-900 mt-1">
                             {(() => {
-                              const parts = activeMemo.rescheduledTo.split(' ');
-                              const datePart = parts[0];
-                              const timePart = parts[1] || '';
+                              // Parse the UTC datetime string
+                              const utcDate = new Date(activeMemo.rescheduledTo);
                               
-                              // Only show "at [time]" if time is actually provided
-                              if (timePart && timePart.trim() !== '') {
-                                return `${formatPatientDate(datePart)} at ${timePart}`;
-                              } else {
-                                return formatPatientDate(datePart);
+                              // Check if the date is valid
+                              if (isNaN(utcDate.getTime())) {
+                                return activeMemo.rescheduledTo; // Fallback to original if invalid
                               }
+                              
+                              // Extract UTC components
+                              const year = utcDate.getUTCFullYear().toString().slice(-2); // Last 2 digits
+                              const month = utcDate.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+                              const day = utcDate.getUTCDate();
+                              const hours = utcDate.getUTCHours();
+                              const minutes = utcDate.getUTCMinutes();
+                              
+                              // Format date as "13-Jan-26"
+                              const formattedDate = `${day}-${month}-${year}`;
+                              
+                              // Format time as "11:00" (24-hour format) or "11:00 AM" (12-hour format)
+                              // Using 12-hour format with AM/PM
+                              const period = hours >= 12 ? 'PM' : 'AM';
+                              const displayHours = hours % 12 || 12; // Convert 0 to 12 for midnight
+                              const formattedTime = `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+                              
+                              // Check if time is midnight (00:00) - might indicate date-only
+                              if (hours === 0 && minutes === 0) {
+                                return formattedDate; // Date only
+                              }
+                              
+                              return `${formattedDate} at ${formattedTime}`;
                             })()}
                           </p>
                           {activeMemo.note && (
@@ -623,7 +643,7 @@ export default function PatientDashboard() {
                   {prescriptions.slice(0, 2).map((p) => (
                     <div key={p.id} className="flex items-center justify-between">
                       <div className="text-sm">
-                        <div className="font-medium text-slate-800">{p.name}</div>
+                        <div className="font-medium text-slate-800">{p.medicine}</div>
                         <div className="text-slate-500">
                           {formatPatientDate(p.date)} • {p.doctor}
                         </div>
