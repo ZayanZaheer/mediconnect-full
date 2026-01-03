@@ -13,15 +13,12 @@ import { inputWithIcon } from "../lib/ui.js";
 import { fetchMedicalHistory } from "../lib/medicalApi.js";
 import { useAuth } from "../context/AuthProvider.jsx";
 import { Download } from "lucide-react";
-// BACKEND base URL helper - use relative path for production compatibility
-const backendUrl = "";
+import { API_CONFIG } from '../config/api.js';
 
 function fullUrl(path) {
   if (!path) return null;
-  // already absolute URL?
   if (path.startsWith("http")) return path;
-  // convert "/uploads/prescriptions/17.pdf" → "/uploads/prescriptions/17.pdf"
-  return backendUrl + path;
+  return API_CONFIG.BASE_URL + path;
 }
 
 function toDateOnly(d) {
