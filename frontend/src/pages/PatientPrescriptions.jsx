@@ -13,12 +13,13 @@ import { inputWithIcon } from "../lib/ui.js";
 import { fetchMedicalHistory } from "../lib/medicalApi.js";
 import { useAuth } from "../context/AuthProvider.jsx";
 import { Download } from "lucide-react";
-import { API_CONFIG } from '../config/api.js';
+import { API_CONFIG, API_BASE_URL } from '../config/api.js';
 
 function fullUrl(path) {
   if (!path) return null;
   if (path.startsWith("http")) return path;
-  return API_CONFIG.BASE_URL + path;
+  // Static files (uploads) are served from wwwroot without /api prefix
+  return API_BASE_URL + path;
 }
 
 function toDateOnly(d) {
