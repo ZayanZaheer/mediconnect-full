@@ -57,7 +57,8 @@ builder.Services.AddCors(options =>
     "http://localhost:5174",
     "http://0.0.0.0:5000",
     "http://100.26.176.5:5000",
-    "https://mediconnect-full.vercel.app"
+    "https://mediconnect-full.vercel.app",
+    "https://shana-subcordate-raymon.ngrok-free.dev"
 )
 .AllowAnyMethod()
 .AllowAnyHeader()
